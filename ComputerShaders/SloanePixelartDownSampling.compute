@@ -1,0 +1,32 @@
+#pragma kernel DownSamplingBase
+#pragma kernel DownSamplingAA
+
+Texture2D<float4> _Source;
+RWTexture2D<float4> _Target;
+uint _SamplingScale;
+uint _Width;
+uint _Height;
+
+[numthreads(8,8,1)]
+void DownSamplingBase (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > _Width || id.y > _Height) return;
+
+    uint2 sourceCoord = id.xy * _SamplingScale + uint2(1, 1) * _SamplingScale / 2;
+
+    _Target[id.xy] = _Source[sourceCoord];
+}
+
+float _DiffThreshold;
+
+[numthreads(8,8,1)]
+void DownSamplingAA (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > _Width || id.y > _Height) return;
+
+    uint2 sourceCoord = id.xy * _SamplingScale + uint2(1, 1) * _SamplingScale / 2;
+    float4 targetColor = _Source[sourceCoord];
+
+    uint MinCount = 0.0;
+    _Target[id.xy] = _Source[sourceCoord];
+}
