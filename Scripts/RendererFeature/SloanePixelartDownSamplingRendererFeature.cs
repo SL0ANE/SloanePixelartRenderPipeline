@@ -8,7 +8,7 @@ namespace Sloane
 {
     public class SloanePixelartDownSamplingRendererFeature : ScriptableRendererFeature
     {
-        [SerializeField, HideInInspector]
+        [SerializeField]
         private ComputeShader m_DownSamplingComputeShader;
         private SloanePixelartDownSamplingRendererFeaturePass m_DownSamplingPass;
 

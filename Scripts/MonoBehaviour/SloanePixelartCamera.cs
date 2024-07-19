@@ -36,7 +36,7 @@ namespace Sloane
         RenderTexture m_DepthBuffer;
         [SerializeField, HideInInspector]
         List<RenderTexture> m_TargetBuffers;
-        RenderTargetIdentifier[] m_MultiBufferIdentifiers = new RenderTargetIdentifier[(int)TargetBuffer.Max];
+        RenderTargetIdentifier[] m_MultiBufferIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageRenderObjects - TargetBufferStage.Start];
 
         public Vector2Int TextureResolution => m_TargetResolution * m_DownSamplingScale;
         public int TextureWidth => m_TargetResolution.x * m_DownSamplingScale;
@@ -151,6 +151,9 @@ namespace Sloane
         {
             ReleaseBuffers();
 
+            if (m_TargetBuffers == null) m_TargetBuffers = new List<RenderTexture>();
+            else m_TargetBuffers?.Clear();
+
             RenderTextureDescriptor targetDesc = new RenderTextureDescriptor()
             {
                 depthBufferBits = 0,
@@ -163,15 +166,40 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            if (m_TargetBuffers == null) m_TargetBuffers = new List<RenderTexture>();
-            else m_TargetBuffers?.Clear();
-            for (int i = 0; i < (int)TargetBuffer.Max; i++)
+            for (int i = (int)TargetBufferStage.Start + 1; i <= (int)TargetBufferStage.StageRenderObjects; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
                 m_TargetBuffers[i].Create();
                 m_MultiBufferIdentifiers[i] = m_TargetBuffers[i];
             }
+
+            for (int i = (int)TargetBufferStage.StageRenderObjects + 1; i <= (int)TargetBufferStage.StagePostBeforeDownSampling; i++)
+            {
+                m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
+                m_TargetBuffers[i].filterMode = FilterMode.Point;
+                m_TargetBuffers[i].Create();
+            }
+
+            targetDesc = new RenderTextureDescriptor()
+            {
+                depthBufferBits = 0,
+                enableRandomWrite = true,
+                graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
+                width = TargetWidth,
+                height = TargetHeight,
+                volumeDepth = 1,
+                msaaSamples = 1,
+                dimension = TextureDimension.Tex2D
+            };
+
+            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i <= (int)TargetBufferStage.Max; i++)
+            {
+                m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
+                m_TargetBuffers[i].filterMode = FilterMode.Point;
+                m_TargetBuffers[i].Create();
+            }
+
 
             RenderTextureDescriptor depthDesc = new RenderTextureDescriptor()
             {
