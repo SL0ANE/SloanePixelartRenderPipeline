@@ -39,6 +39,18 @@ namespace Sloane
         {
             m_FilteringSettings = new FilteringSettings(RenderQueueRange.opaque, layerMask);
         }
+
+        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
+        {
+            cmd.EnableKeyword(SloanePixelartKeywordsStorage.PixelartRendering);
+            base.OnCameraSetup(cmd, ref renderingData);
+        }
+
+        public override void OnCameraCleanup(CommandBuffer cmd)
+        {
+            cmd.DisableKeyword(SloanePixelartKeywordsStorage.PixelartRendering);
+            base.OnCameraCleanup(cmd);
+        }
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var camera = renderingData.cameraData.camera;

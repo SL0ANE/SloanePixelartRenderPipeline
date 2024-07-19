@@ -16,6 +16,7 @@ namespace Sloane
 
         public override void Create()
         {
+            GlobalKeyword.Create("PIXELART_RENDERING");
             m_DebugPass = new SloanePixelartDebugRendererFeaturePass(m_TargerBuffer)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering

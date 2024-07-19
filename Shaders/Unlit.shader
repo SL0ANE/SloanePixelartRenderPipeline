@@ -3,6 +3,7 @@ Shader "Sloane/Pixelart/Unlit"
     Properties
     {
         _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _LocalUnitScale("Local Unit Scale", Int) = 1
     }
     SubShader
     {
@@ -10,12 +11,17 @@ Shader "Sloane/Pixelart/Unlit"
 
         HLSLINCLUDE
         #define ALIGN_TO_PIXEL
-        #include "Includes/Common.hlsl"
+        #define UNIT_SCALE
+
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #pragma multi_compile_instancing
 
         CBUFFER_START(UnityPerMaterial)
         float4 _BaseColor;
+        int _LocalUnitScale;
         CBUFFER_END
+
+        #include "Includes/Common.hlsl"
 
         ENDHLSL
 
@@ -40,4 +46,6 @@ Shader "Sloane/Pixelart/Unlit"
             ENDHLSL
         }
     }
+
+    FallBack "Universal Render Pipeline/Unlit"
 }

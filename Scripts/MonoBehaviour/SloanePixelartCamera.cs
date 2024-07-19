@@ -68,7 +68,7 @@ namespace Sloane
         public RenderTexture GetBuffer(TargetBuffer targetBuffer)
         {
             int index = (int)targetBuffer;
-            if(index > m_TargetBuffers.Count || m_TargetBuffers == null) return null;
+            if(index >= m_TargetBuffers.Count || m_TargetBuffers == null) return m_DepthBuffer;
             return m_TargetBuffers[index];
         }
 
