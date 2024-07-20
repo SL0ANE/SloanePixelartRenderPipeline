@@ -16,7 +16,7 @@ namespace Sloane
         {
             m_RenderObjectPass = new SloanePixelartOpaqueRenderRendererFeaturePass(m_LayerMask)
             {
-                renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
+                renderPassEvent = RenderPassEvent.AfterRendering
             };
         }
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -72,15 +72,30 @@ namespace Sloane
                 float alignedY = Mathf.Round(cameraTranslation.y / unitSize) * unitSize;
                 cameraTranslation = new Vector4(alignedX, alignedY, cameraTranslation.z, cameraTranslation.w);
                 viewMatrix.SetColumn(3, cameraTranslation);
-                cmd.SetGlobalMatrix(SloanePixelartShaderPropertyStorage.ViewMatrix, viewMatrix);
-                cmd.SetGlobalFloat(SloanePixelartShaderPropertyStorage.UnitSize, unitSize);
+                cmd.SetGlobalMatrix(ShaderPropertyStorage.ViewMatrix, viewMatrix);
+                cmd.SetGlobalMatrix(ShaderPropertyStorage.InvViewMatrix, viewMatrix.inverse);
+                var proj = renderingData.cameraData.GetProjectionMatrix();
+                proj.SetColumn(1, -1 * proj.GetColumn(1));
+                cmd.SetProjectionMatrix(proj);
+                cmd.SetInvertCulling(true);
+                cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
 
                 cmd.SetRenderTarget(pixelArtCamera.MultiBufferIdentifiers, pixelArtCamera.DepthBuffer);
                 cmd.ClearRenderTarget(true, true, Color.black, 1);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
-
+                
                 context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_FilteringSettings);
+
+                for (int i = (int)TargetBufferStage.Start + 1; i <= (int)TargetBufferStage.StageRenderObjects; i++)
+                {
+                    cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty((TargetBuffer)i), pixelArtCamera.GetBuffer((TargetBuffer)i));
+                }
+
+                cmd.SetGlobalTexture(TargetBufferUtil.DepthBufferShaderProperty, pixelArtCamera.DepthBuffer);
+                cmd.SetInvertCulling(false);
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
             }
 
             context.ExecuteCommandBuffer(cmd);

@@ -8,8 +8,8 @@ float3 GetWorldPositionWithDepth(float2 uv, float sceneRawDepth)
     if(unity_OrthoParams.w)
     {
         float sceneDepthVS = lerp(_ProjectionParams.y, _ProjectionParams.z, sceneRawDepth);
-        float2 viewRayEndPosVS_xy = float2(unity_OrthoParams.xy * uv);
-        float3 posVSOrtho = float3(-viewRayEndPosVS_xy, -sceneDepthVS);
+        float2 viewRayEndPosVS_xy = float2(unity_OrthoParams.xy * (uv * 2.0 - 1.0));
+        float3 posVSOrtho = float3(viewRayEndPosVS_xy, sceneDepthVS);
 
         worldPos = mul(unity_CameraToWorld, float4(posVSOrtho, 1)).xyz;
     }

@@ -1,5 +1,20 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7620938903301614757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056424cf53a1ee84381d6a340d8fa2ad, type: 3}
+  m_Name: SloanePixelartShadingRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_DiffuseShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa,
+    type: 3}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29,7 +44,7 @@ MonoBehaviour:
   m_Name: SloanePixelartDebugRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_TargerBuffer: 0
+  m_TargerBuffer: 2
   m_DownSamplingComputeShader: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
@@ -49,9 +64,10 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -3698282000451687298}
+  - {fileID: -7620938903301614757}
   - {fileID: -3125560631150118436}
   - {fileID: 5144671279807723687}
-  m_RendererFeatureMap: 7e2cdb6b1d10adccdcf959782ac79fd4a7f81777458b6547
+  m_RendererFeatureMap: 7e2cdb6b1d10adcc5b93c0e571fc3c96dcf959782ac79fd4a7f81777458b6547
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -77,7 +93,7 @@ MonoBehaviour:
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
   m_TransparentLayerMask:
     serializedVersion: 2
     m_Bits: 0

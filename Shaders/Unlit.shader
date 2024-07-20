@@ -37,7 +37,7 @@ Shader "Sloane/Pixelart/Unlit"
             void UnlitFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal: BUFFER_NORMAL)
             {
                 outAlbedo = _BaseColor;
-                outNormal = float4(input.normalWS, 1.0);
+                outNormal = float4(normalize(input.normalWS), 1.0);
             }
 
             #pragma vertex PixelartBaseVert

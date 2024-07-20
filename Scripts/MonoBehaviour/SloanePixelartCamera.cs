@@ -193,7 +193,7 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i <= (int)TargetBufferStage.Max; i++)
+            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i < (int)TargetBufferStage.Max; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;

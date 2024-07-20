@@ -23,6 +23,7 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
             #include "../Includes/Math.hlsl"
             #include "../Includes/Blit.hlsl"
             #include "../Includes/Transform.hlsl"
+            #include "../Includes/Lighting.hlsl"
 
             sampler2D _MainTex;
             sampler2D _NormalBuffer;
@@ -31,9 +32,10 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
             float3 DiffuseShading(Light light, float3 normal, float level, float transmission)
             {
                 float ndotl = dot(light.direction, normal);
+                ndotl *= light.distanceAttenuation;
                 ndotl = saturate(ndotl);
-                // ndotl *= light.distanceAttenuation;
-
+                ndotl = pow(ndotl, 1.0 / 2.2);
+                
                 ndotl = multiStep(ndotl, level, 0.0, 0.0);
                 
                 ndotl *= level;
@@ -53,17 +55,20 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
 
                 float sceneRawDepth = tex2D(_DepthBuffer, uv).r;
 
-                #if defined(UNITY_REVERSED_Z)
-                    sceneRawDepth = 1-sceneRawDepth;
-                #endif
-
                 float3 positionWS = GetWorldPositionWithDepth(uv, sceneRawDepth);
                 float3 normalWS = tex2D(_NormalBuffer, uv).xyz;
                 float3 outputColor = float3(0.0, 0.0, 0.0);
 
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(positionWS));
+                mainLight.distanceAttenuation = 1.0;
                 outputColor += DiffuseShading(mainLight, normalWS, 3.0, 0.0);
 
+                LIGHT_LOOP_BEGIN(_AdditionalLightCount)
+                    Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
+                    outputColor += DiffuseShading(light, normalWS, 3.0, 0.0);
+                LIGHT_LOOP_END
+
+                // return float4((positionWS + float3(0.0, 0.0, 11.0)) * 0.5 + 0.5, 1.0);
                 return float4(outputColor, 1.0);
             }
             ENDHLSL

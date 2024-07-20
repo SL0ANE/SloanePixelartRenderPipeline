@@ -56,11 +56,11 @@ namespace Sloane
             {
                 cmd.GetTemporaryRT(m_RenderTextureName, pixelArtCamera.TargetWidth, pixelArtCamera.TargetHeight, m_CameraColorTarget.rt.depth, FilterMode.Point, m_CameraColorTarget.rt.graphicsFormat, 1, true);
                 
-                cmd.SetComputeTextureParam(m_DownSamplingComputerShader, m_DownSamplingComputerShaderKernelIndex, SloanePixelartShaderPropertyStorage.Source, m_CameraColorTarget);
-                cmd.SetComputeTextureParam(m_DownSamplingComputerShader, m_DownSamplingComputerShaderKernelIndex, SloanePixelartShaderPropertyStorage.Target, m_RenderTextureName);
-                cmd.SetComputeIntParam(m_DownSamplingComputerShader, SloanePixelartShaderPropertyStorage.Width, pixelArtCamera.TargetWidth);
-                cmd.SetComputeIntParam(m_DownSamplingComputerShader, SloanePixelartShaderPropertyStorage.Height, pixelArtCamera.TargetHeight);
-                cmd.SetComputeIntParam(m_DownSamplingComputerShader, SloanePixelartShaderPropertyStorage.SamplingScale, pixelArtCamera.DownSamplingScale);
+                cmd.SetComputeTextureParam(m_DownSamplingComputerShader, m_DownSamplingComputerShaderKernelIndex, ShaderPropertyStorage.Source, m_CameraColorTarget);
+                cmd.SetComputeTextureParam(m_DownSamplingComputerShader, m_DownSamplingComputerShaderKernelIndex, ShaderPropertyStorage.Target, m_RenderTextureName);
+                cmd.SetComputeIntParam(m_DownSamplingComputerShader, ShaderPropertyStorage.Width, pixelArtCamera.TargetWidth);
+                cmd.SetComputeIntParam(m_DownSamplingComputerShader, ShaderPropertyStorage.Height, pixelArtCamera.TargetHeight);
+                cmd.SetComputeIntParam(m_DownSamplingComputerShader, ShaderPropertyStorage.SamplingScale, pixelArtCamera.DownSamplingScale);
 
                 cmd.DispatchCompute(m_DownSamplingComputerShader, m_DownSamplingComputerShaderKernelIndex, pixelArtCamera.TargetWidth / 8, pixelArtCamera.TargetHeight / 8, 1);
                 cmd.Blit(m_RenderTextureName, m_CameraColorTarget);

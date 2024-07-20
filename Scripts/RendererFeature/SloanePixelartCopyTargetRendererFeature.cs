@@ -13,7 +13,7 @@ namespace Sloane
         {
             m_CopyTargetPass = new SloanePixelartCopyTargetRendererFeaturePass
             {
-                renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
+                renderPassEvent = RenderPassEvent.AfterRendering
             };
         }
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
