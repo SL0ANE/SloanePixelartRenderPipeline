@@ -7,9 +7,11 @@ namespace Sloane
     // Depth should be handled individually.
     public enum TargetBuffer
     {
-        Albedo = 0,
-        Normal = 1,
-        Diffuse = 2,
+        Depth = 0,
+        Albedo = 1,
+        Normal = 2,
+        Connection = 3,
+        Diffuse = 4,
         Max,
     }
 
@@ -17,16 +19,17 @@ namespace Sloane
     public enum TargetBufferStage
     {
         Start = -1,
-        StageRenderObjects = 1,
-        StagePostBeforeDownSampling = 1,
-        StagePostAfterDownSampling = 2,
+        MarkerDepth = 0,
+        StageRenderObjects = 2,
+        StagePostBeforeDownSampling = 2,
+        MarkerConnectionMap = 3,
+        StagePostAfterDownSampling = 4,
         Max = 3,
     }
 
     public static class TargetBufferUtil
     {
         private static List<int> m_TargetBufferShaderProperty;
-        public static readonly int DepthBufferShaderProperty = Shader.PropertyToID("_DepthBuffer");
         private static bool m_Initialize = false;
 
         private static void Initialize()

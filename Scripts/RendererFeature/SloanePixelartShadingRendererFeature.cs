@@ -42,10 +42,7 @@ namespace Sloane
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 cmd.SetGlobalInt(ShaderPropertyStorage.AdditionalLightCount, renderingData.lightData.additionalLightsCount);
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
             }
-
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             CommandBufferPool.Release(cmd);

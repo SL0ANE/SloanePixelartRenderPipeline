@@ -80,7 +80,7 @@ namespace Sloane
                 cmd.SetInvertCulling(true);
                 cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
 
-                cmd.SetRenderTarget(pixelArtCamera.MultiBufferIdentifiers, pixelArtCamera.DepthBuffer);
+                cmd.SetRenderTarget(pixelArtCamera.MultiBufferIdentifiers, pixelArtCamera.GetBuffer(TargetBuffer.Depth));
                 cmd.ClearRenderTarget(true, true, Color.black, 1);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
@@ -92,10 +92,7 @@ namespace Sloane
                     cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty((TargetBuffer)i), pixelArtCamera.GetBuffer((TargetBuffer)i));
                 }
 
-                cmd.SetGlobalTexture(TargetBufferUtil.DepthBufferShaderProperty, pixelArtCamera.DepthBuffer);
                 cmd.SetInvertCulling(false);
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
             }
 
             context.ExecuteCommandBuffer(cmd);

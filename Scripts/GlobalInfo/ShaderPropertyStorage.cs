@@ -13,5 +13,7 @@ namespace Sloane
         public static readonly int Target = Shader.PropertyToID("_Target");
         public static readonly int Source = Shader.PropertyToID("_Source");
         public static readonly int AdditionalLightCount = Shader.PropertyToID("_AdditionalLightCount");
+        public static readonly int DepthDiffThreshold = Shader.PropertyToID("_DepthDiffThreshold");
+        public static readonly int DepthCurvThreshold = Shader.PropertyToID("_DepthCurvThreshold");
     }
 }

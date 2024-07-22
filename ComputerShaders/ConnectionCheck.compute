@@ -1,0 +1,91 @@
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityInput.hlsl"
+
+#pragma kernel Main
+#define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
+Texture2D<float4> _DepthBuffer;
+RWTexture2D<float4> _ConnectionMap;
+int _Width;
+int _Height;
+float _DepthCurvThreshold;
+float _DepthDiffThreshold;
+
+void CheckDepthConnected(int2 center, int2 target, int stepCount, inout uint connected, inout uint closer, bool preShoot = false)
+{
+    float width = _Width * 1;
+    float height = _Height * 1;
+
+    if(target.x > width || target.y > height || target.x < 0 || target.y < 0)
+    {
+        connected = 0;
+        closer = 1;
+        return;
+    }
+
+    float centerDepth = LINEAR_DEPTH(_DepthBuffer[center].r);
+    float targetDepth = LINEAR_DEPTH(_DepthBuffer[target].r);
+
+    closer = centerDepth < targetDepth ? 1 : 0;
+    connected = 0;
+
+    float2 direction = float2(target - center);
+    float distance = length(direction);
+    direction /= distance;
+
+    if (distance == 0)
+    {
+        connected = 1;
+        return;
+    }
+
+    float prevDepth = centerDepth;
+    int i = preShoot ? -1 : 1;
+
+    for(; i <= stepCount; i++)
+    {
+        float t = float(i) / float(stepCount);
+        int2 intermediatePoint = int2(float2(center) + t * direction * distance);
+
+        float intermediateDepth = LINEAR_DEPTH(_DepthBuffer[intermediatePoint].r);
+
+        float expectedDepth = lerp(centerDepth, targetDepth, t);
+        float depthCurv = abs(intermediateDepth - expectedDepth);
+        float depthDiff = abs(intermediateDepth - prevDepth);
+
+        if (depthCurv > _DepthCurvThreshold && depthDiff > _DepthDiffThreshold)
+        {
+            connected = 0;
+            return;
+        }
+    }
+
+    connected = 1;
+}
+
+[numthreads(8,8,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > uint(_Width) || id.y > uint(_Height)) return;
+
+    uint2 interval = uint2(1, 1);
+    uint2 sourceCoord = id.xy;
+    float4 result = float4(0.0, 0.0, 0.0, 0.0);
+
+    uint connected = 0;
+    uint closer = 0;
+
+    CheckDepthConnected(sourceCoord, sourceCoord + int2(1, 0), 1, connected, closer, true);
+    result.x = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+
+    CheckDepthConnected(sourceCoord, sourceCoord + int2(0, 1), 1, connected, closer, true);
+    result.y = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+
+    CheckDepthConnected(sourceCoord, sourceCoord - int2(1, 0), 1, connected, closer, true);
+    result.z = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+
+    CheckDepthConnected(sourceCoord, sourceCoord - int2(0, 1), 1, connected, closer, true);
+    result.w = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+
+    _ConnectionMap[id.xy] = result;
+}

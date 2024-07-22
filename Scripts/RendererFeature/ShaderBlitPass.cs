@@ -35,7 +35,7 @@ namespace Sloane
                 cmd.SetRenderTarget(targerBuffer);
                 cmd.Blit(sourceBuffer, targerBuffer, m_Material);
             }
-
+            
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             CommandBufferPool.Release(cmd);

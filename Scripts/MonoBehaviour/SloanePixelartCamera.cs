@@ -33,10 +33,8 @@ namespace Sloane
         [SerializeField, HideInInspector]
         RenderTexture m_ResultBuffer;
         [SerializeField, HideInInspector]
-        RenderTexture m_DepthBuffer;
-        [SerializeField, HideInInspector]
         List<RenderTexture> m_TargetBuffers;
-        RenderTargetIdentifier[] m_MultiBufferIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageRenderObjects - TargetBufferStage.Start];
+        RenderTargetIdentifier[] m_MultiBufferIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageRenderObjects - TargetBufferStage.MarkerDepth];
 
         public Vector2Int TextureResolution => m_TargetResolution * m_DownSamplingScale;
         public int TextureWidth => m_TargetResolution.x * m_DownSamplingScale;
@@ -45,7 +43,6 @@ namespace Sloane
         public int TargetHeight => m_TargetResolution.y;
         public int DownSamplingScale => m_DownSamplingScale;
         public RenderTexture ResultBuffer => m_ResultBuffer;
-        public RenderTexture DepthBuffer => m_DepthBuffer;
         public float UnitSize => m_CastCamera.orthographicSize * 2.0f / TargetHeight;
 
         public RenderTargetIdentifier[] MultiBufferIdentifiers => m_MultiBufferIdentifiers;
@@ -68,7 +65,7 @@ namespace Sloane
         public RenderTexture GetBuffer(TargetBuffer targetBuffer)
         {
             int index = (int)targetBuffer;
-            if(index >= m_TargetBuffers.Count || m_TargetBuffers == null) return m_DepthBuffer;
+            if(index >= m_TargetBuffers.Count || m_TargetBuffers == null) return m_ResultBuffer;
             return m_TargetBuffers[index];
         }
 
@@ -133,12 +130,6 @@ namespace Sloane
                 }
             }
 
-            if (m_DepthBuffer != null)
-            {
-                RenderTexture.ReleaseTemporary(m_DepthBuffer);
-                m_DepthBuffer = null;
-            }
-
             if (m_ResultBuffer != null)
             {
                 m_CastCamera.targetTexture = null;
@@ -156,6 +147,24 @@ namespace Sloane
 
             RenderTextureDescriptor targetDesc = new RenderTextureDescriptor()
             {
+                depthBufferBits = 24,
+                graphicsFormat = GraphicsFormat.None,
+                width = TextureWidth,
+                height = TextureHeight,
+                volumeDepth = 1,
+                msaaSamples = 1,
+                dimension = TextureDimension.Tex2D
+            };
+
+            for (int i = (int)TargetBufferStage.Start + 1; i <= (int)TargetBufferStage.MarkerDepth; i++)
+            {
+                m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
+                m_TargetBuffers[i].filterMode = FilterMode.Point;
+                m_TargetBuffers[i].Create();
+            }
+
+            targetDesc = new RenderTextureDescriptor()
+            {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
                 graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
@@ -166,15 +175,34 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.Start + 1; i <= (int)TargetBufferStage.StageRenderObjects; i++)
+            for (int i = (int)TargetBufferStage.MarkerDepth + 1; i <= (int)TargetBufferStage.StageRenderObjects; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
                 m_TargetBuffers[i].Create();
-                m_MultiBufferIdentifiers[i] = m_TargetBuffers[i];
+                m_MultiBufferIdentifiers[i - (int)TargetBufferStage.MarkerDepth - 1] = m_TargetBuffers[i];
             }
 
             for (int i = (int)TargetBufferStage.StageRenderObjects + 1; i <= (int)TargetBufferStage.StagePostBeforeDownSampling; i++)
+            {
+                m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
+                m_TargetBuffers[i].filterMode = FilterMode.Point;
+                m_TargetBuffers[i].Create();
+            }
+
+            targetDesc = new RenderTextureDescriptor()
+            {
+                depthBufferBits = 0,
+                enableRandomWrite = true,
+                graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
+                width = TextureWidth,
+                height = TextureHeight,
+                volumeDepth = 1,
+                msaaSamples = 1,
+                dimension = TextureDimension.Tex2D
+            };
+
+            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i <= (int)TargetBufferStage.MarkerConnectionMap; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
@@ -193,28 +221,12 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i < (int)TargetBufferStage.Max; i++)
+            for (int i = (int)TargetBufferStage.MarkerConnectionMap + 1; i <= (int)TargetBufferStage.StagePostAfterDownSampling; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
                 m_TargetBuffers[i].Create();
             }
-
-
-            RenderTextureDescriptor depthDesc = new RenderTextureDescriptor()
-            {
-                depthBufferBits = 24,
-                graphicsFormat = GraphicsFormat.None,
-                width = TextureWidth,
-                height = TextureHeight,
-                volumeDepth = 1,
-                msaaSamples = 1,
-                dimension = TextureDimension.Tex2D
-            };
-
-            m_DepthBuffer = RenderTexture.GetTemporary(depthDesc);
-            m_DepthBuffer.filterMode = FilterMode.Point;
-            m_DepthBuffer.Create();
 
             RenderTextureDescriptor resultDesc = new RenderTextureDescriptor()
             {
