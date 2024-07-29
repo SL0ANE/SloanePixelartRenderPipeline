@@ -67,17 +67,10 @@ namespace Sloane
                 // Align the camera to the unit size so the shape won't dither when the camera moves.
                 
                 Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
-                Vector4 cameraTranslation = viewMatrix.GetColumn(3);
-                float alignedX = Mathf.Round(cameraTranslation.x / unitSize) * unitSize;
-                float alignedY = Mathf.Round(cameraTranslation.y / unitSize) * unitSize;
-                cameraTranslation = new Vector4(alignedX, alignedY, cameraTranslation.z, cameraTranslation.w);
-                viewMatrix.SetColumn(3, cameraTranslation);
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.ViewMatrix, viewMatrix);
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.InvViewMatrix, viewMatrix.inverse);
                 var proj = renderingData.cameraData.GetProjectionMatrix();
-                proj.SetColumn(1, -1 * proj.GetColumn(1));
                 cmd.SetProjectionMatrix(proj);
-                cmd.SetInvertCulling(true);
                 cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
 
                 cmd.SetRenderTarget(pixelArtCamera.MultiBufferIdentifiers, pixelArtCamera.GetBuffer(TargetBuffer.Depth));
@@ -91,8 +84,6 @@ namespace Sloane
                 {
                     cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty((TargetBuffer)i), pixelArtCamera.GetBuffer((TargetBuffer)i));
                 }
-
-                cmd.SetInvertCulling(false);
             }
 
             context.ExecuteCommandBuffer(cmd);

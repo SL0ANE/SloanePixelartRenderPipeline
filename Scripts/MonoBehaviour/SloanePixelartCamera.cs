@@ -145,12 +145,10 @@ namespace Sloane
             if (m_TargetBuffers == null) m_TargetBuffers = new List<RenderTexture>();
             else m_TargetBuffers?.Clear();
 
-            RenderTextureDescriptor targetDesc = new RenderTextureDescriptor()
+            RenderTextureDescriptor targetDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
             {
                 depthBufferBits = 24,
                 graphicsFormat = GraphicsFormat.None,
-                width = TextureWidth,
-                height = TextureHeight,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
@@ -163,13 +161,11 @@ namespace Sloane
                 m_TargetBuffers[i].Create();
             }
 
-            targetDesc = new RenderTextureDescriptor()
+            targetDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
             {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
                 graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
-                width = TextureWidth,
-                height = TextureHeight,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
@@ -190,13 +186,11 @@ namespace Sloane
                 m_TargetBuffers[i].Create();
             }
 
-            targetDesc = new RenderTextureDescriptor()
+            targetDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
             {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
                 graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
-                width = TextureWidth,
-                height = TextureHeight,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
@@ -209,13 +203,11 @@ namespace Sloane
                 m_TargetBuffers[i].Create();
             }
 
-            targetDesc = new RenderTextureDescriptor()
+            targetDesc = new RenderTextureDescriptor(TargetWidth, TargetHeight)
             {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
                 graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
-                width = TargetWidth,
-                height = TargetHeight,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
@@ -228,13 +220,11 @@ namespace Sloane
                 m_TargetBuffers[i].Create();
             }
 
-            RenderTextureDescriptor resultDesc = new RenderTextureDescriptor()
+            RenderTextureDescriptor resultDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
             {
                 depthBufferBits = 24,
                 enableRandomWrite = true,
                 graphicsFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.HDR),
-                width = TextureWidth,
-                height = TextureHeight,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
