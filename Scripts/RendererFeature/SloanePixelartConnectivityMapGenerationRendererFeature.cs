@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace Sloane
 {
-    public class SloanePixelartConnectionMapGenerationRendererFeature : ScriptableRendererFeature
+    public class SloanePixelartConnectivityMapGenerationRendererFeature : ScriptableRendererFeature
     {
         [SerializeField]
         private float m_DepthCurvThreshold = 0.1f;
@@ -18,7 +18,7 @@ namespace Sloane
 
         public override void Create()
         {
-            m_GenerationPass = new ComputeShaderPass(m_ConnectionCheckShader, "Main", "GenerateConnectionMap", 8, 8, BeforeDispatch)
+            m_GenerationPass = new ComputeShaderPass(m_ConnectionCheckShader, "Main", "GenerateConnectivityMap", 8, 8, BeforeDispatch)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -29,7 +29,7 @@ namespace Sloane
             renderer.EnqueuePass(m_GenerationPass);
             m_GenerationPass.ClearSourceBuffers();
             m_GenerationPass.AddSourceBuffer("_DepthBuffer", pixelartCamera.GetBuffer(TargetBuffer.Depth));
-            m_GenerationPass.SetTargetBuffer("_ConnectionMap", pixelartCamera.GetBuffer(TargetBuffer.Connection));
+            m_GenerationPass.SetTargetBuffer("_ConnectivityMap", pixelartCamera.GetBuffer(TargetBuffer.Connection));
         }
 
         private void BeforeDispatch(CommandBuffer cmd, RenderingData renderingData, ComputeShader computeShader)

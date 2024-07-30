@@ -5,7 +5,7 @@
 #pragma kernel Main
 #define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
 Texture2D<float4> _DepthBuffer;
-RWTexture2D<float4> _ConnectionMap;
+RWTexture2D<float4> _ConnectivityMap;
 int _Width;
 int _Height;
 float _DepthCurvThreshold;
@@ -87,5 +87,5 @@ void Main (uint3 id : SV_DispatchThreadID)
     CheckDepthConnected(sourceCoord, sourceCoord - int2(0, 1), 1, connected, closer, true);
     result.w = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
 
-    _ConnectionMap[id.xy] = result;
+    _ConnectivityMap[id.xy] = result;
 }

@@ -22,7 +22,7 @@ namespace Sloane
         MarkerDepth = 0,
         StageRenderObjects = 2,
         StagePostBeforeDownSampling = 2,
-        MarkerConnectionMap = 3,
+        MarkerConnectivityMap = 3,
         StagePostAfterDownSampling = 4,
         Max = 3,
     }

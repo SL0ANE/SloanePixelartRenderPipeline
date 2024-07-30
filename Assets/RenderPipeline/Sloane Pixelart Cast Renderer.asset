@@ -15,23 +15,6 @@ MonoBehaviour:
   m_Active: 1
   m_DiffuseShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa,
     type: 3}
---- !u!114 &-5415960281635313224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59da5f900a45e5048821e1729edd3e30, type: 3}
-  m_Name: SloanePixelartConnectionMapGenerationRendererFeature
-  m_EditorClassIdentifier: 
-  m_Active: 1
-  m_DepthCurvThreshold: 0.5
-  m_DepthDiffThreshold: 1.6
-  m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
-    type: 3}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,10 +64,10 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -3698282000451687298}
-  - {fileID: -5415960281635313224}
+  - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
   - {fileID: -3125560631150118436}
-  m_RendererFeatureMap: 7e2cdb6b1d10adccb8a9809fd1a4d6b45b93c0e571fc3c96dcf959782ac79fd4
+  m_RendererFeatureMap: 7e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -127,6 +110,23 @@ MonoBehaviour:
   m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 1
   m_IntermediateTextureMode: 1
+--- !u!114 &4356717984580538091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59da5f900a45e5048821e1729edd3e30, type: 3}
+  m_Name: SloanePixelartConnectivityMapGenerationRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_DepthCurvThreshold: 0.1
+  m_DepthDiffThreshold: 0.1
+  m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
+    type: 3}
 --- !u!114 &5144671279807723687
 MonoBehaviour:
   m_ObjectHideFlags: 0
