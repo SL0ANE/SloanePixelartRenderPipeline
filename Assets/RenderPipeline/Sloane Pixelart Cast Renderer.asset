@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_TargerBuffer: 2
+  m_TargerBuffer: 3
   m_DownSamplingComputeShader: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
@@ -123,8 +123,7 @@ MonoBehaviour:
   m_Name: SloanePixelartConnectivityMapGenerationRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_DepthCurvThreshold: 0.1
-  m_DepthDiffThreshold: 0.1
+  m_Threshold: 0.15
   m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
     type: 3}
 --- !u!114 &5144671279807723687

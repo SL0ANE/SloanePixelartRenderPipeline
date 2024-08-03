@@ -9,9 +9,7 @@ namespace Sloane
     public class SloanePixelartConnectivityMapGenerationRendererFeature : ScriptableRendererFeature
     {
         [SerializeField]
-        private float m_DepthCurvThreshold = 0.1f;
-        [SerializeField]
-        private float m_DepthDiffThreshold = 0.1f;
+        private float m_Threshold = 0.5f;
         [SerializeField]
         private ComputeShader m_ConnectionCheckShader;
         private ComputeShaderPass m_GenerationPass;
@@ -28,15 +26,15 @@ namespace Sloane
             var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
             renderer.EnqueuePass(m_GenerationPass);
             m_GenerationPass.ClearSourceBuffers();
-            m_GenerationPass.AddSourceBuffer("_DepthBuffer", pixelartCamera.GetBuffer(TargetBuffer.Depth));
-            m_GenerationPass.SetTargetBuffer("_ConnectivityMap", pixelartCamera.GetBuffer(TargetBuffer.Connection));
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Depth), pixelartCamera.GetBuffer(TargetBuffer.Depth));
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), pixelartCamera.GetBuffer(TargetBuffer.Normal));
+            m_GenerationPass.SetTargetBuffer(ShaderPropertyStorage.ConnectivityMap, pixelartCamera.GetBuffer(TargetBuffer.Connection));
         }
 
         private void BeforeDispatch(CommandBuffer cmd, RenderingData renderingData, ComputeShader computeShader)
         {
             var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
-            cmd.SetComputeFloatParam(computeShader, ShaderPropertyStorage.DepthCurvThreshold, m_DepthCurvThreshold);
-            cmd.SetComputeFloatParam(computeShader, ShaderPropertyStorage.DepthDiffThreshold, m_DepthDiffThreshold);
+            cmd.SetComputeFloatParam(computeShader, ShaderPropertyStorage.Threshold, m_Threshold);
             cmd.SetComputeIntParam(computeShader, ShaderPropertyStorage.SamplingScale, pixelartCamera.DownSamplingScale);
         }
     }

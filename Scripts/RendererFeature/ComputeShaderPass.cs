@@ -39,25 +39,35 @@ namespace Sloane
             m_ThreadNum = new Vector2Int(numX, numY);
         }
 
-        public void SetTargetBuffer(string name, RenderTexture buffer)
+        public void SetTargetBuffer(int name, RenderTexture buffer)
         {
             SetTargetBuffer(name, buffer, buffer.width, buffer.height);
         }
 
-        public void SetTargetBuffer(string name, RenderTargetIdentifier identifier, int width, int height)
+        public void SetTargetBuffer(string name, RenderTexture buffer)
+        {
+            SetTargetBuffer(Shader.PropertyToID(name), buffer, buffer.width, buffer.height);
+        }
+
+        public void SetTargetBuffer(int name, RenderTargetIdentifier identifier, int width, int height)
         {
             m_TargetBuffer = new ComputeShaderBuffer()
             {
-                BufferName = Shader.PropertyToID(name),
+                BufferName = name,
                 Width = width,
                 Height = height,
                 BufferIdentifier = identifier
             };
         }
 
-        public void AddSourceBuffer(string name, RenderTexture buffer)
+        public void AddSourceBuffer(int name, RenderTexture buffer)
         {
             AddSourceBuffer(name, buffer, buffer.width, buffer.height);
+        }
+
+        public void AddSourceBuffer(string name, RenderTexture buffer)
+        {
+            AddSourceBuffer(Shader.PropertyToID(name), buffer, buffer.width, buffer.height);
         }
 
         public void ClearSourceBuffers()
@@ -65,11 +75,11 @@ namespace Sloane
             m_SourceBuffers.Clear();
         }
 
-        public void AddSourceBuffer(string name, RenderTargetIdentifier identifier, int width, int height)
+        public void AddSourceBuffer(int name, RenderTargetIdentifier identifier, int width, int height)
         {
             var sourceBuffer = new ComputeShaderBuffer()
             {
-                BufferName = Shader.PropertyToID(name),
+                BufferName = name,
                 Width = width,
                 Height = height,
                 BufferIdentifier = identifier
@@ -92,11 +102,12 @@ namespace Sloane
                 cmd.SetComputeTextureParam(m_ComputeShader, m_ComputeShaderKernelIndex, m_TargetBuffer.BufferName, m_TargetBuffer.BufferIdentifier);
                 cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Width, m_TargetBuffer.Width);
                 cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Height, m_TargetBuffer.Height);
+                cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
 
                 m_CallbackBeforeDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
 
                 // cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
-                cmd.DispatchCompute(m_ComputeShader, m_ComputeShaderKernelIndex, m_TargetBuffer.Width / m_ThreadNum.x, m_TargetBuffer.Height / m_ThreadNum.y, 1);
+                cmd.DispatchCompute(m_ComputeShader, m_ComputeShaderKernelIndex, Mathf.CeilToInt((float)m_TargetBuffer.Width / m_ThreadNum.x), Mathf.CeilToInt((float)m_TargetBuffer.Height / m_ThreadNum.y), 1);
 
                 m_CallbackAfterDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
             }

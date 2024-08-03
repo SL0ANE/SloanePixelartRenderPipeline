@@ -42,7 +42,7 @@ namespace Sloane
             {
                 string enumName = Enum.GetName(typeof(TargetBuffer), (TargetBuffer)i);
                 m_TargetBufferShaderProperty.Add(Shader.PropertyToID($"_{enumName}Buffer"));
-                Debug.Log($"_{enumName}Buffer");
+                // Debug.Log($"_{enumName}Buffer");
             }
         }
 

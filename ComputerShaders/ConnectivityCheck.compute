@@ -1,66 +1,75 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "../Shaders/Includes/Transform.hlsl"
 
 #pragma kernel Main
 #define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
 Texture2D<float4> _DepthBuffer;
+Texture2D<float4> _NormalBuffer;
 RWTexture2D<float4> _ConnectivityMap;
 int _Width;
 int _Height;
-float _DepthCurvThreshold;
-float _DepthDiffThreshold;
+float _Threshold;
 
-void CheckDepthConnected(int2 center, int2 target, int stepCount, inout uint connected, inout uint closer, bool preShoot = false)
+void CheckDepthConnected(int2 center, int2 target, inout uint connected, inout uint closer, inout float3 debug)
 {
-    float width = _Width * 1;
-    float height = _Height * 1;
+    float width = _Width;
+    float height = _Height;
 
-    if(target.x > width || target.y > height || target.x < 0 || target.y < 0)
+    if(target.x >= width || target.y >= height || target.x < 0 || target.y < 0)
     {
-        connected = 0;
+        connected = 1;
         closer = 1;
         return;
     }
 
-    float centerDepth = LINEAR_DEPTH(_DepthBuffer[center].r);
-    float targetDepth = LINEAR_DEPTH(_DepthBuffer[target].r);
+    float centerDepth = _DepthBuffer[center].r;
+    float targetDepth = _DepthBuffer[target].r;
+
+    #if defined(UNITY_REVERSED_Z)
+    centerDepth = 1.0 - centerDepth;
+    targetDepth = 1.0 - targetDepth;
+    #endif
+
+    centerDepth = LINEAR_DEPTH(centerDepth);
+    targetDepth = LINEAR_DEPTH(targetDepth);
 
     closer = centerDepth < targetDepth ? 1 : 0;
-    connected = 0;
-
-    float2 direction = float2(target - center);
-    float distance = length(direction);
-    direction /= distance;
-
-    if (distance == 0)
-    {
-        connected = 1;
-        return;
-    }
-
-    float prevDepth = centerDepth;
-    int i = preShoot ? -1 : 1;
-
-    for(; i <= stepCount; i++)
-    {
-        float t = float(i) / float(stepCount);
-        int2 intermediatePoint = int2(float2(center) + t * direction * distance);
-
-        float intermediateDepth = LINEAR_DEPTH(_DepthBuffer[intermediatePoint].r);
-
-        float expectedDepth = lerp(centerDepth, targetDepth, t);
-        float depthCurv = abs(intermediateDepth - expectedDepth);
-        float depthDiff = abs(intermediateDepth - prevDepth);
-
-        if (depthCurv > _DepthCurvThreshold && depthDiff > _DepthDiffThreshold)
-        {
-            connected = 0;
-            return;
-        }
-    }
-
     connected = 1;
+
+    float2 centerUV = float2(float(center.x) / float(_Width), float(center.y) / float(_Height));
+    float3 centerPos = GetViewPositionWithDepth(centerUV, _DepthBuffer[center].r);
+
+    float2 targetUV = float2(float(target.x) / float(_Width), float(target.y) / float(_Height));
+    float3 targetPos = GetViewPositionWithDepth(targetUV, _DepthBuffer[target].r);
+
+    float3 normalCenter = _NormalBuffer[center].xyz;
+    normalCenter = TransformWorldToViewDir(normalCenter);
+
+    float2 pixelSpacing = (centerPos.xy - targetPos.xy);
+    float dz_x = -normalCenter.x * pixelSpacing.x / normalCenter.z;
+    float dz_y = -normalCenter.y * pixelSpacing.y / normalCenter.z;
+
+    float predictDepth = centerDepth + dz_x + dz_y;
+
+    float resultCenter = abs(predictDepth - targetDepth);
+
+    float3 normalTarget = _NormalBuffer[target].xyz;
+    normalTarget = TransformWorldToViewDir(normalTarget);
+
+    dz_x = -normalTarget.x * pixelSpacing.x / normalTarget.z;
+    dz_y = -normalTarget.y * pixelSpacing.y / normalTarget.z;
+
+    predictDepth = centerDepth + dz_x + dz_y;
+
+    float resultTarget = abs(predictDepth - targetDepth);
+
+    if(dot(normalTarget, normalTarget) < 0.5 && dot(normalCenter, normalCenter) >= 0.5) connected = 0;
+    else if(dot(normalTarget, normalTarget) >= 0.5 && dot(normalCenter, normalCenter) < 0.5) connected = 0;
+    else if(resultCenter > _Threshold && resultTarget > _Threshold) connected = 0;
+
+    debug = float3(resultCenter, resultCenter, length(_NormalBuffer[center].xyz) > 0.5);
 }
 
 [numthreads(8,8,1)]
@@ -68,24 +77,26 @@ void Main (uint3 id : SV_DispatchThreadID)
 {
     if(id.x > uint(_Width) || id.y > uint(_Height)) return;
 
-    uint2 interval = uint2(1, 1);
-    uint2 sourceCoord = id.xy;
+    int2 sourceCoord = int2(id.xy);
     float4 result = float4(0.0, 0.0, 0.0, 0.0);
+    float3 debug = float3(0.0, 0.0, 0.0);
 
     uint connected = 0;
     uint closer = 0;
 
-    CheckDepthConnected(sourceCoord, sourceCoord + int2(1, 0), 1, connected, closer, true);
-    result.x = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+    CheckDepthConnected(sourceCoord, sourceCoord + int2(1, 0), connected, closer, debug);
+    result.x = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord + int2(0, 1), 1, connected, closer, true);
-    result.y = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+    CheckDepthConnected(sourceCoord, sourceCoord + int2(0, 1), connected, closer, debug);
+    result.y = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord - int2(1, 0), 1, connected, closer, true);
-    result.z = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+    CheckDepthConnected(sourceCoord, sourceCoord - int2(1, 0), connected, closer, debug);
+    result.z = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord - int2(0, 1), 1, connected, closer, true);
-    result.w = PackFloatInt8bit(0.0, (connected << 7) + (0 << 6), 256.0);
+    CheckDepthConnected(sourceCoord, sourceCoord - int2(0, 1), connected, closer, debug);
+    result.w = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
 
+
+    // _ConnectivityMap[id.xy] = float4(debug, 1.0);
     _ConnectivityMap[id.xy] = result;
 }
