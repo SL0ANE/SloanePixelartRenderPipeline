@@ -1,0 +1,43 @@
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+
+#pragma kernel Main
+Texture2D<float4> _ConnectivityMap;
+RWTexture2D<float> _ConnectivityResultBuffer;
+uint _Width;
+uint _Height;
+uint _SamplingScale;
+
+[numthreads(8,8,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > _Width || id.y > _Height) return;
+    int halfScale = int(_SamplingScale / 2);
+    uint2 center = uint2(id.x * _SamplingScale + uint(halfScale), id.y * _SamplingScale + uint(halfScale));
+    float fakeFloot = 0.0;
+    int data;
+    float totalCount = 0;
+    
+    for(int i = -halfScale; i <= halfScale; i++)
+    {
+        for(int j = -halfScale; j <= halfScale; j++)
+        {
+            float4 rawData = _ConnectivityMap[uint2(int2(center) + int2(i, j))];
+            UnpackFloatInt8bit(rawData.r, 256.0, fakeFloot, data);
+            int targetConnectedToCenter = (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.g, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.b, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.a, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            if(targetConnectedToCenter > 0) totalCount += 1.0;
+        }
+    }
+
+    _ConnectivityResultBuffer[id.xy] = totalCount / float(_SamplingScale * _SamplingScale);
+}

@@ -1,0 +1,66 @@
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+
+#pragma kernel Main
+Texture2D<float4> _PrevConnectivityMap;
+RWTexture2D<float4> _ConnectivityMap;
+int _Width;
+int _Height;
+uint _SamplingScale;
+
+void Flood(int2 source, int2 target, int2 center, float4 colorMask)
+{
+    if(target.x >= _Width || target.y >= _Height || target.x < 0 || target.y < 0) return;
+    uint2 diff = uint2(abs(target - center));
+    uint halfScale = _SamplingScale / 2;
+    if(diff.x > halfScale || diff.y > halfScale) return;
+    
+    float4 rawData = colorMask * _PrevConnectivityMap[source];
+    rawData.r = rawData.r + rawData.g + rawData.b + rawData.a;
+    float fakeFloot = 0.0;
+    uint data = 0;
+    UnpackFloatInt8bit(rawData.r, 256.0, fakeFloot, data);
+    int sourceConnectedToCenter = (data & (1 << 5)) > 0 ? 1 : 0;
+    if(sourceConnectedToCenter > 0) return;
+    int sourceConnectedToTarget = (data & (1 << 7)) > 0 ? 1 : 0;
+    if(sourceConnectedToTarget <= 0) return;
+    int sourceCloserThanTarget = (data & (1 << 6)) > 0 ? 1 : 0;
+
+    rawData = _PrevConnectivityMap[target];
+    UnpackFloatInt8bit(rawData.r, 256.0, fakeFloot, data);
+    int targetConnectedToCenter = (data & (1 << 5)) > 0 ? 1 : 0;
+
+    UnpackFloatInt8bit(rawData.g, 256.0, fakeFloot, data);
+    targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+    UnpackFloatInt8bit(rawData.b, 256.0, fakeFloot, data);
+    targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+    UnpackFloatInt8bit(rawData.a, 256.0, fakeFloot, data);
+    targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+    
+    if(targetConnectedToCenter > 0)
+    {
+        float4 outputColor = _ConnectivityMap[source];
+        outputColor *= (float4(1.0, 1.0, 1.0, 1.0) - colorMask);
+        outputColor += colorMask * PackFloatInt8bit(0.0, (sourceConnectedToTarget << 7) + (sourceCloserThanTarget << 6) + (1 << 5), 256.0);
+
+        _ConnectivityMap[source] = outputColor;
+    }
+}
+
+
+[numthreads(8,8,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > uint(_Width) || id.y > uint(_Height)) return;
+
+    int2 sourceCoord = int2(id.xy);
+    uint halfScale = _SamplingScale / 2;
+    int2 center = int2(id.x - (id.x % _SamplingScale) + halfScale, id.y - (id.y % _SamplingScale) + halfScale);
+
+    Flood(sourceCoord, sourceCoord + int2(1, 0), center, float4(1.0, 0.0, 0.0, 0.0));
+    Flood(sourceCoord, sourceCoord + int2(0, 1), center, float4(0.0, 1.0, 0.0, 0.0));
+    Flood(sourceCoord, sourceCoord - int2(1, 0), center, float4(0.0, 0.0, 1.0, 0.0));
+    Flood(sourceCoord, sourceCoord - int2(0, 1), center, float4(0.0, 0.0, 0.0, 1.0));
+}

@@ -65,7 +65,7 @@ namespace Sloane
         public RenderTexture GetBuffer(TargetBuffer targetBuffer)
         {
             int index = (int)targetBuffer;
-            if(index >= m_TargetBuffers.Count || m_TargetBuffers == null) return m_ResultBuffer;
+            if (index >= m_TargetBuffers.Count || m_TargetBuffers == null) return m_ResultBuffer;
             return m_TargetBuffers[index];
         }
 
@@ -138,6 +138,11 @@ namespace Sloane
             }
         }
 
+        /* private void UpdateParam()
+        {
+            
+        } */
+
         private void GetBuffers()
         {
             ReleaseBuffers();
@@ -190,13 +195,30 @@ namespace Sloane
             {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
-                graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
+                graphicsFormat = GraphicsFormat.R8G8B8A8_SNorm,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i <= (int)TargetBufferStage.MarkerConnectivityMap; i++)
+            for (int i = (int)TargetBufferStage.StagePostBeforeDownSampling + 1; i <= (int)TargetBufferStage.MarkerConnectivityDetail; i++)
+            {
+                m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
+                m_TargetBuffers[i].filterMode = FilterMode.Point;
+                m_TargetBuffers[i].Create();
+            }
+
+            targetDesc = new RenderTextureDescriptor(TargetWidth, TargetHeight)
+            {
+                depthBufferBits = 0,
+                enableRandomWrite = true,
+                graphicsFormat = GraphicsFormat.R8_UNorm,
+                volumeDepth = 1,
+                msaaSamples = 1,
+                dimension = TextureDimension.Tex2D
+            };
+
+            for (int i = (int)TargetBufferStage.MarkerConnectivityDetail + 1; i <= (int)TargetBufferStage.MarkerConnectivityResult; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
@@ -213,7 +235,7 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.MarkerConnectivityMap + 1; i <= (int)TargetBufferStage.StagePostAfterDownSampling; i++)
+            for (int i = (int)TargetBufferStage.MarkerConnectivityResult + 1; i <= (int)TargetBufferStage.StagePostAfterDownSampling; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;

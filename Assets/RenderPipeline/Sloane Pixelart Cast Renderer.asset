@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Shading
   m_EditorClassIdentifier: 
   m_Active: 1
+  m_AAThresholdScale: 1
   m_DiffuseShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa,
     type: 3}
 --- !u!114 &-3698282000451687298
@@ -44,7 +45,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_TargerBuffer: 3
+  m_TargerBuffer: 5
   m_DownSamplingComputeShader: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
@@ -124,7 +125,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_Threshold: 0.15
+  m_IterationScale: 1.5
   m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
+    type: 3}
+  m_ConnectionFloodShader: {fileID: 7200000, guid: 08bfa070ce388da48ad6e4b3fc5bd0f8,
+    type: 3}
+  m_ConnectionResultShader: {fileID: 7200000, guid: a10af8ffe32135b409e8c1fcac7887fb,
     type: 3}
 --- !u!114 &5144671279807723687
 MonoBehaviour:

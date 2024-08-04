@@ -48,14 +48,14 @@ namespace Sloane
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var camera = renderingData.cameraData.camera;
-            var pixelArtCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
+            var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
 
             var cmd = CommandBufferPool.Get();
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 cmd.SetRenderTarget(m_CameraColorTarget);
-                cmd.Blit(pixelArtCamera.GetBuffer(m_TargerBuffer), m_CameraColorTarget);
+                cmd.Blit(pixelartCamera.GetBuffer(m_TargerBuffer), m_CameraColorTarget);
             }
 
             context.ExecuteCommandBuffer(cmd);

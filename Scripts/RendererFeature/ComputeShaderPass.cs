@@ -94,6 +94,8 @@ namespace Sloane
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
+                m_CallbackBeforeDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
+                
                 foreach (var buffer in m_SourceBuffers)
                 {
                     cmd.SetComputeTextureParam(m_ComputeShader, m_ComputeShaderKernelIndex, buffer.BufferName, buffer.BufferIdentifier);
@@ -103,8 +105,6 @@ namespace Sloane
                 cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Width, m_TargetBuffer.Width);
                 cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Height, m_TargetBuffer.Height);
                 cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
-
-                m_CallbackBeforeDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
 
                 // cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
                 cmd.DispatchCompute(m_ComputeShader, m_ComputeShaderKernelIndex, Mathf.CeilToInt((float)m_TargetBuffer.Width / m_ThreadNum.x), Mathf.CeilToInt((float)m_TargetBuffer.Height / m_ThreadNum.y), 1);

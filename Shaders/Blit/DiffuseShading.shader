@@ -28,8 +28,9 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
             sampler2D _MainTex;
             sampler2D _NormalBuffer;
             sampler2D _DepthBuffer;
+            sampler2D _ConnectivityResultBuffer;
 
-            float3 DiffuseShading(Light light, float3 normal, float level, float transmission)
+            float3 DiffuseShading(Light light, float3 normal, float connect, float level, float transmission)
             {
                 float ndotl = dot(light.direction, normal);
                 ndotl *= light.distanceAttenuation;
@@ -37,10 +38,8 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
                 ndotl = pow(ndotl, 1.0 / 2.2);
                 
                 ndotl = multiStep(ndotl, level, 0.0, 0.0);
-                
-                ndotl *= level;
-                ndotl = round(ndotl);
-                ndotl /= level;
+                float singleLevel = 1.0 / (level - 1.0);
+                if(ndotl > singleLevel && connect < _ConnectivityAntialiasingThreshold) ndotl -= singleLevel;
 
                 ndotl = lerp(transmission, 1.0, ndotl);
 
@@ -57,15 +56,16 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
 
                 float3 positionWS = GetWorldPositionWithDepth(uv, sceneRawDepth);
                 float3 normalWS = tex2D(_NormalBuffer, uv).xyz;
+                float connect = tex2D(_ConnectivityResultBuffer, uv).r;
                 float3 outputColor = float3(0.0, 0.0, 0.0);
 
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(positionWS));
                 mainLight.distanceAttenuation = 1.0;
-                outputColor += DiffuseShading(mainLight, normalWS, 3.0, 0.0);
+                outputColor += DiffuseShading(mainLight, normalWS, connect, 4.0, 0.0);
 
                 LIGHT_LOOP_BEGIN(_AdditionalLightCount)
                     Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
-                    outputColor += DiffuseShading(light, normalWS, 3.0, 0.0);
+                    outputColor += DiffuseShading(light, normalWS, connect, 4.0, 0.0);
                 LIGHT_LOOP_END
 
                 // return float4((positionWS + float3(0.0, 0.0, 11.0)) * 0.5 + 0.5, 1.0);

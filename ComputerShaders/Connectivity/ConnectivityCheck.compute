@@ -11,13 +11,11 @@ RWTexture2D<float4> _ConnectivityMap;
 int _Width;
 int _Height;
 float _Threshold;
+uint _SamplingScale;
 
-void CheckDepthConnected(int2 center, int2 target, inout uint connected, inout uint closer, inout float3 debug)
+void CheckConnected(int2 center, int2 target, inout uint connected, inout uint closer)
 {
-    float width = _Width;
-    float height = _Height;
-
-    if(target.x >= width || target.y >= height || target.x < 0 || target.y < 0)
+    if(target.x >= _Width || target.y >= _Height || target.x < 0 || target.y < 0)
     {
         connected = 1;
         closer = 1;
@@ -68,8 +66,6 @@ void CheckDepthConnected(int2 center, int2 target, inout uint connected, inout u
     if(dot(normalTarget, normalTarget) < 0.5 && dot(normalCenter, normalCenter) >= 0.5) connected = 0;
     else if(dot(normalTarget, normalTarget) >= 0.5 && dot(normalCenter, normalCenter) < 0.5) connected = 0;
     else if(resultCenter > _Threshold && resultTarget > _Threshold) connected = 0;
-
-    debug = float3(resultCenter, resultCenter, length(_NormalBuffer[center].xyz) > 0.5);
 }
 
 [numthreads(8,8,1)]
@@ -83,20 +79,20 @@ void Main (uint3 id : SV_DispatchThreadID)
 
     uint connected = 0;
     uint closer = 0;
+    uint center = ((id.x % _SamplingScale) == (_SamplingScale / 2) && (id.y % _SamplingScale) == (_SamplingScale / 2)) ? 1 : 0;
 
-    CheckDepthConnected(sourceCoord, sourceCoord + int2(1, 0), connected, closer, debug);
-    result.x = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
+    CheckConnected(sourceCoord, sourceCoord + int2(1, 0), connected, closer);
+    result.x = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord + int2(0, 1), connected, closer, debug);
-    result.y = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
+    CheckConnected(sourceCoord, sourceCoord + int2(0, 1), connected, closer);
+    result.y = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord - int2(1, 0), connected, closer, debug);
-    result.z = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
+    CheckConnected(sourceCoord, sourceCoord - int2(1, 0), connected, closer);
+    result.z = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckDepthConnected(sourceCoord, sourceCoord - int2(0, 1), connected, closer, debug);
-    result.w = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6), 256.0);
+    CheckConnected(sourceCoord, sourceCoord - int2(0, 1), connected, closer);
+    result.w = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
 
-    // _ConnectivityMap[id.xy] = float4(debug, 1.0);
     _ConnectivityMap[id.xy] = result;
 }

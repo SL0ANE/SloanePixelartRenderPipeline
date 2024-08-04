@@ -10,8 +10,9 @@ namespace Sloane
         Depth = 0,
         Albedo = 1,
         Normal = 2,
-        Connection = 3,
-        Diffuse = 4,
+        ConnectivityDetail = 3,
+        ConnectivityResult = 4,
+        Diffuse = 5,
         Max,
     }
 
@@ -22,8 +23,9 @@ namespace Sloane
         MarkerDepth = 0,
         StageRenderObjects = 2,
         StagePostBeforeDownSampling = 2,
-        MarkerConnectivityMap = 3,
-        StagePostAfterDownSampling = 4,
+        MarkerConnectivityDetail = 3,
+        MarkerConnectivityResult = 4,
+        StagePostAfterDownSampling = 5,
         Max = 3,
     }
 

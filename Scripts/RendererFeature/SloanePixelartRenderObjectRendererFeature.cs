@@ -54,13 +54,13 @@ namespace Sloane
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var camera = renderingData.cameraData.camera;
-            var pixelArtCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
+            var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
 
             var cmd = CommandBufferPool.Get();
 
             SortingCriteria sortingCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
             DrawingSettings drawingSettings = CreateDrawingSettings(TargetShader, ref renderingData, sortingCriteria);
-            float unitSize = pixelArtCamera.UnitSize;
+            float unitSize = pixelartCamera.UnitSize;
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
@@ -73,7 +73,7 @@ namespace Sloane
                 cmd.SetProjectionMatrix(proj);
                 cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
 
-                cmd.SetRenderTarget(pixelArtCamera.MultiBufferIdentifiers, pixelArtCamera.GetBuffer(TargetBuffer.Depth));
+                cmd.SetRenderTarget(pixelartCamera.MultiBufferIdentifiers, pixelartCamera.GetBuffer(TargetBuffer.Depth));
                 cmd.ClearRenderTarget(true, true, Color.black, 1);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
@@ -82,7 +82,7 @@ namespace Sloane
 
                 for (int i = (int)TargetBufferStage.Start + 1; i <= (int)TargetBufferStage.StageRenderObjects; i++)
                 {
-                    cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty((TargetBuffer)i), pixelArtCamera.GetBuffer((TargetBuffer)i));
+                    cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty((TargetBuffer)i), pixelartCamera.GetBuffer((TargetBuffer)i));
                 }
             }
 
