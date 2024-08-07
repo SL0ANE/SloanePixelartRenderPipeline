@@ -4,9 +4,11 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
+  - m_ConnectivityCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
       type: 3}
-  - m_ConnectionFloodShader: {fileID: 7200000, guid: 08bfa070ce388da48ad6e4b3fc5bd0f8,
+  - m_ConnectivityFloodShader: {fileID: 7200000, guid: 08bfa070ce388da48ad6e4b3fc5bd0f8,
+      type: 3}
+  - m_ConnectivityResultShader: {fileID: 7200000, guid: a10af8ffe32135b409e8c1fcac7887fb,
       type: 3}
   executionOrder: 0
   icon: {instanceID: 0}

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Shading
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_AAThresholdScale: 1
   m_DiffuseShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa,
     type: 3}
 --- !u!114 &-3698282000451687298
@@ -45,8 +44,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_TargerBuffer: 5
-  m_DownSamplingComputeShader: {fileID: 0}
+  m_TargerBuffer: 7
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,7 +66,8 @@ MonoBehaviour:
   - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
   - {fileID: -3125560631150118436}
-  m_RendererFeatureMap: 7e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4
+  - {fileID: 5439611315726938619}
+  m_RendererFeatureMap: 7e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4fb7119deab617d4b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -126,11 +125,11 @@ MonoBehaviour:
   m_Active: 1
   m_Threshold: 0.15
   m_IterationScale: 1.5
-  m_ConnectionCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
+  m_ConnectivityCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
     type: 3}
-  m_ConnectionFloodShader: {fileID: 7200000, guid: 08bfa070ce388da48ad6e4b3fc5bd0f8,
+  m_ConnectivityFloodShader: {fileID: 7200000, guid: 08bfa070ce388da48ad6e4b3fc5bd0f8,
     type: 3}
-  m_ConnectionResultShader: {fileID: 7200000, guid: a10af8ffe32135b409e8c1fcac7887fb,
+  m_ConnectivityResultShader: {fileID: 7200000, guid: a10af8ffe32135b409e8c1fcac7887fb,
     type: 3}
 --- !u!114 &5144671279807723687
 MonoBehaviour:
@@ -147,3 +146,19 @@ MonoBehaviour:
   m_Active: 1
   m_DownSamplingComputeShader: {fileID: 7200000, guid: d9742f4e8fb8b2a4da7a2fa59aae6eca,
     type: 3}
+--- !u!114 &5439611315726938619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3164c81cb78b3ad43923215828d3caba, type: 3}
+  m_Name: SloanePixelartColorCorrectionRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,
+    type: 3}
+  m_Palette: {fileID: 2800000, guid: b4396614aa72e034f82d9309bf86e80d, type: 3}

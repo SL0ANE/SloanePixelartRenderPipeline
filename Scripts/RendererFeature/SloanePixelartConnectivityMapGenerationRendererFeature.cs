@@ -13,11 +13,11 @@ namespace Sloane
         [SerializeField]
         private float m_IterationScale = 1.5f;
         [SerializeField]
-        private ComputeShader m_ConnectionCheckShader;
+        private ComputeShader m_ConnectivityCheckShader;
         [SerializeField]
-        private ComputeShader m_ConnectionFloodShader;
+        private ComputeShader m_ConnectivityFloodShader;
         [SerializeField]
-        private ComputeShader m_ConnectionResultShader;
+        private ComputeShader m_ConnectivityResultShader;
         private ComputeShaderPass m_GenerationPass;
         private ComputeShaderPass m_FloodingPass;
         private ComputeShaderPass m_ResultingPass;
@@ -26,19 +26,19 @@ namespace Sloane
 
         public override void Create()
         {
-            if (m_ConnectionCheckShader == null || m_ConnectionFloodShader == null || m_ConnectionResultShader == null) return;
+            if (m_ConnectivityCheckShader == null || m_ConnectivityFloodShader == null || m_ConnectivityResultShader == null) return;
 
-            m_GenerationPass = new ComputeShaderPass(m_ConnectionCheckShader, "Main", "ConnectivityMapGeneration", 8, 8, BeforeGenerateDispatch)
+            m_GenerationPass = new ComputeShaderPass(m_ConnectivityCheckShader, "Main", "ConnectivityMapGeneration", 8, 8, BeforeGenerateDispatch)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
-            m_FloodingPass = new ComputeShaderPass(m_ConnectionFloodShader, "Main", "ConnectivityMapFlooding", 8, 8, BeforeFloodDispatch, AfterFloodDispatch)
+            m_FloodingPass = new ComputeShaderPass(m_ConnectivityFloodShader, "Main", "ConnectivityMapFlooding", 8, 8, BeforeFloodDispatch, AfterFloodDispatch)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
-            m_ResultingPass = new ComputeShaderPass(m_ConnectionResultShader, "Main", "ConnectivityMapResulting", 8, 8, BeforeResultDispatch, AfterResultDispatch)
+            m_ResultingPass = new ComputeShaderPass(m_ConnectivityResultShader, "Main", "ConnectivityMapResulting", 8, 8, BeforeResultDispatch, AfterResultDispatch)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -79,10 +79,10 @@ namespace Sloane
         private void BeforeFloodDispatch(CommandBuffer cmd, RenderingData renderingData, ComputeShader computeShader)
         {
             var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
-            var connectionBuffer = pixelartCamera.GetBuffer(TargetBuffer.ConnectivityDetail);
-            RenderTextureDescriptor tempDes = connectionBuffer.descriptor;
+            var ConnectivityBuffer = pixelartCamera.GetBuffer(TargetBuffer.ConnectivityDetail);
+            RenderTextureDescriptor tempDes = ConnectivityBuffer.descriptor;
             cmd.GetTemporaryRT(m_FloodingBlitBufferId, tempDes);
-            cmd.Blit(connectionBuffer, m_FloodingBlitBufferIdentifier);
+            cmd.Blit(ConnectivityBuffer, m_FloodingBlitBufferIdentifier);
 
             cmd.SetComputeIntParam(computeShader, ShaderPropertyStorage.SamplingScale, pixelartCamera.DownSamplingScale);
         }

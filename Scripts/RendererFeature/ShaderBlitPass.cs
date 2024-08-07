@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,34 +9,62 @@ namespace Sloane
 {
     public class ShaderBlitPass : ScriptableRenderPass
     {
-        private ProfilingSampler m_ProfilingSampler;
-        private Material m_Material;
-        private TargetBuffer m_SourceBuffer;
-        private TargetBuffer m_TargetBuffer;
-        public ShaderBlitPass(string profilingName, Shader shader, TargetBuffer sourceBuffer, TargetBuffer targetBuffer)
+
+        static ProfilingSampler m_ProfilingSampler;
+        Material m_Material;
+        RenderTexture m_TargetBuffer;
+        RenderTexture m_SourceBuffer;
+        Action<CommandBuffer, RenderingData> m_CallbackBeforeBlit;
+        Action<CommandBuffer, RenderingData> m_CallbackAfterBlit;
+
+        protected static readonly int m_DuplicateCaseBlitBufferId = Shader.PropertyToID("DuplicateCaseBlit");
+
+        public ShaderBlitPass(Shader shader, string profilingName, Action<CommandBuffer, RenderingData> callbackBeforeBlit = null, Action<CommandBuffer, RenderingData> callbackAfterBlit = null)
         {
             m_Material = new Material(shader);
             m_ProfilingSampler = new ProfilingSampler(profilingName);
 
-            m_SourceBuffer = sourceBuffer;
-            m_TargetBuffer = targetBuffer;
+            m_CallbackBeforeBlit = callbackBeforeBlit;
+            m_CallbackAfterBlit = callbackAfterBlit;
+        }
+
+        public void SetTargetBuffer(RenderTexture identifier)
+        {
+            m_TargetBuffer = identifier;
+        }
+
+        public void SetSourceBuffer(RenderTexture identifier)
+        {
+            m_SourceBuffer = identifier;
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            var camera = renderingData.cameraData.camera;
-            var pixelArtCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
-            var sourceBuffer = pixelArtCamera.GetBuffer(m_SourceBuffer);
-            var targerBuffer = pixelArtCamera.GetBuffer(m_TargetBuffer);
-
             var cmd = CommandBufferPool.Get();
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                cmd.SetRenderTarget(targerBuffer);
-                cmd.Blit(sourceBuffer, targerBuffer, m_Material);
+                m_CallbackBeforeBlit?.Invoke(cmd, renderingData);
+
+                if (m_TargetBuffer == m_SourceBuffer)
+                {
+                    cmd.GetTemporaryRT(m_DuplicateCaseBlitBufferId, m_TargetBuffer.descriptor);
+                    cmd.SetRenderTarget(m_DuplicateCaseBlitBufferId);
+                    cmd.Blit(m_SourceBuffer, m_DuplicateCaseBlitBufferId);
+                    cmd.SetRenderTarget(m_TargetBuffer);
+                    cmd.SetGlobalTexture(ShaderPropertyStorage.MainTex, m_DuplicateCaseBlitBufferId);
+                    cmd.Blit(m_DuplicateCaseBlitBufferId, m_TargetBuffer, m_Material);
+                    cmd.ReleaseTemporaryRT(m_DuplicateCaseBlitBufferId);
+                }
+                else
+                {
+                    cmd.SetRenderTarget(m_TargetBuffer);
+                    cmd.Blit(m_SourceBuffer, m_TargetBuffer, m_Material);
+                }
+
+                m_CallbackAfterBlit?.Invoke(cmd, renderingData);
             }
-            
+
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             CommandBufferPool.Release(cmd);

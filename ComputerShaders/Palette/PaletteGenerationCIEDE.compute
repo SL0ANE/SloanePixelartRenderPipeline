@@ -1,0 +1,149 @@
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "../../Shaders/Includes/Transform.hlsl"
+
+#pragma kernel Main
+
+
+RWTexture2D<float4> _OutputBuffer;
+uint _Resolution;
+uint _Count;
+StructuredBuffer<float3> _Palette;
+
+// https://www.shadertoy.com/view/msXyz8
+const float epsilon = 0.00001;
+
+float my_sin(float x) { return sin(radians(x)); }
+float my_cos(float x) { return cos(radians(x)); }
+float my_atan(float y, float x) {
+    float v = degrees(atan2(y, x));
+    return (v < 0.0) ? v + 360.0 : v;
+}
+
+float get_h(float a, float b) {
+    bool a_and_b_are_zeros = (abs(a) < epsilon)&&(abs(b) < epsilon);
+    return a_and_b_are_zeros ? 0.0 : my_atan(b, a);
+}
+
+float get_delta_h(float C1, float C2, float h1, float h2) {
+    float diff = h2 - h1;
+    return (C1 * C2 < epsilon) ? 0.0 :
+    (abs(diff) <= 180.0) ? diff :
+    (diff > 180.0) ? diff - 360.0 :
+    diff + 360.0;
+}
+
+float get_h_bar(float C1, float C2, float h1, float h2) {
+    float dist = abs(h1 - h2);
+    float sum = h1 + h2;
+    return (C1 * C2 < epsilon) ? h1 + h2 :
+    (dist <= 180.0) ? 0.5 * sum :
+    (sum < 360.0) ? 0.5 * (sum + 360.0) :
+    0.5 * (sum - 360.0);
+}
+
+float calculate_CIEDE2000(float3 Lab1, float3 Lab2) {
+    float L1 = Lab1.x;
+    float a1 = Lab1.y;
+    float b1 = Lab1.z;
+    float L2 = Lab2.x;
+    float a2 = Lab2.y;
+    float b2 = Lab2.z;
+    
+    float C1_ab = sqrt(a1 * a1 + b1 * b1);
+    float C2_ab = sqrt(a2 * a2 + b2 * b2);
+    float C_ab_bar = 0.5 * (C1_ab + C2_ab);
+    float G = 0.5 * (1.0 - sqrt(pow(C_ab_bar, 7.0) / (pow(C_ab_bar, 7.0) + pow(25.0, 7.0))));
+    float a_1 = (1.0 + G) * a1;
+    float a_2 = (1.0 + G) * a2;
+    float C1 = sqrt(a_1 * a_1 + b1 * b1);
+    float C2 = sqrt(a_2 * a_2 + b2 * b2);
+    float h1 = get_h(a_1, b1);
+    float h2 = get_h(a_2, b2);
+    
+    float delta_L = L2 - L1;
+    float delta_C = C2 - C1;
+    float delta_h = get_delta_h(C1, C2, h1, h2);
+    float delta_H = 2.0 * sqrt(C1 * C2) * my_sin(0.5 * delta_h);
+    
+    float L_bar = 0.5 * (L1 + L2);
+    float C_bar = 0.5 * (C1 + C2);
+    float h_bar = get_h_bar(C1, C2, h1, h2);
+    
+    float T = 1.0 - 0.17 * my_cos(h_bar - 30.0) + 0.24 * my_cos(2.0 * h_bar) +
+    0.32 * my_cos(3.0 * h_bar + 6.0) - 0.20 * my_cos(4.0 * h_bar - 63.0);
+    
+    float delta_theta = 30.0 * exp(-((h_bar - 275.0) / 25.0) * ((h_bar - 275.0) / 25.0));
+    
+    float R_C = 2.0 * sqrt(pow(C_bar, 7.0) / (pow(C_bar, 7.0) + pow(25.0, 7.0)));
+    float S_L = 1.0 + (0.015 * (L_bar - 50.0) * (L_bar - 50.0)) / sqrt(20.0 + (L_bar - 50.0) * (L_bar - 50.0));
+    float S_C = 1.0 + 0.045 * C_bar;
+    float S_H = 1.0 + 0.015 * C_bar * T;
+    float R_T = -my_sin(2.0 * delta_theta) * R_C;
+    
+    const float k_L = 1.0;
+    const float k_C = 1.0;
+    const float k_H = 1.0;
+    
+    float deltaL = delta_L / (k_L * S_L);
+    float deltaC = delta_C / (k_C * S_C);
+    float deltaH = delta_H / (k_H * S_H);
+    
+    float delta_E_squared = deltaL * deltaL + deltaC * deltaC + deltaH * deltaH + R_T * deltaC * deltaH;
+    
+    return sqrt(delta_E_squared);
+}
+
+float3 rgb2xyz(float3 c) {
+    float3 tmp;
+    tmp.x = (c.r > 0.04045) ? pow((abs(c.r + 0.055)) / 1.055, 2.4) : c.r / 12.92;
+    tmp.y = (c.g > 0.04045) ? pow((abs(c.g + 0.055)) / 1.055, 2.4) : c.g / 12.92;
+    tmp.z = (c.b > 0.04045) ? pow((abs(c.b + 0.055)) / 1.055, 2.4) : c.b / 12.92;
+    return 100.0 * mul(tmp, float3x3(0.4124, 0.3576, 0.1805, 0.2126, 0.7152, 0.0722, 0.0193, 0.1192, 0.9505));
+}
+
+float3 xyz2lab(float3 c) {
+    float3 n = c / float3(95.047, 100.0, 108.883);
+    float3 v;
+    v.x = (n.x > 0.008856) ? pow(abs(n.x), 1.0 / 3.0) : (7.787 * n.x) + (16.0 / 116.0);
+    v.y = (n.y > 0.008856) ? pow(abs(n.y), 1.0 / 3.0) : (7.787 * n.y) + (16.0 / 116.0);
+    v.z = (n.z > 0.008856) ? pow(abs(n.z), 1.0 / 3.0) : (7.787 * n.z) + (16.0 / 116.0);
+    return float3((116.0 * v.y) - 16.0, 500.0 * (v.x - v.y), 200.0 * (v.y - v.z));
+}
+
+float3 rgb2lab(float3 c) {
+    float3 lab = xyz2lab(rgb2xyz(c));
+    return float3(lab.x / 100.0, 0.5 + 0.5 * (lab.y / 127.0), 0.5 + 0.5 * (lab.z / 127.0));
+}
+
+float CalculateColorDiff(float3 color0, float3 color1)
+{
+    float3 lab1 = rgb2lab(color0);
+    float3 lab2 = rgb2lab(color1);
+    return calculate_CIEDE2000(lab1, lab2);
+}
+
+[numthreads(8,8,8)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > _Resolution || id.y > _Resolution || id.z > _Resolution) return;
+
+    uint2 outputCoord = uint2(id.z * _Resolution + id.x, _Resolution - id.y - 1);
+    float3 inputColor = float3((float(id.x) + 0.5) / _Resolution, (float(id.y) + 0.5) / _Resolution, (float(id.z) + 0.5) / _Resolution);
+
+    float minDiff = 65535.0f;
+    uint minDiffIndex = 0;
+
+    for(uint i = 0; i < _Count; i++)
+    {
+        float diff = CalculateColorDiff(_Palette[i], inputColor);
+        if(diff < minDiff)
+        {
+            minDiff = diff;
+            minDiffIndex = i;
+        }
+    }
+
+    _OutputBuffer[outputCoord] = float4(_Palette[minDiffIndex], 1.0);
+}

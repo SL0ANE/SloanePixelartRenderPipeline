@@ -9,8 +9,6 @@ namespace Sloane
     public class SloanePixelartShadingRendererFeature : ScriptableRendererFeature
     {
         [SerializeField]
-        private float m_AAThresholdScale = 1.0f;
-        [SerializeField]
         private Shader m_DiffuseShadingShader;
         private BeforeShadingPass m_BeforeShadingPass;
         private ShaderBlitPass m_DiffuseShadingPass;
@@ -22,7 +20,7 @@ namespace Sloane
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
             };
 
-            m_DiffuseShadingPass = new ShaderBlitPass("Diffuse Shading", m_DiffuseShadingShader, TargetBuffer.Albedo, TargetBuffer.Diffuse)
+            m_DiffuseShadingPass = new ShaderBlitPass(m_DiffuseShadingShader, "Diffuse Shading")
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -31,6 +29,15 @@ namespace Sloane
         {
             renderer.EnqueuePass(m_BeforeShadingPass);
             renderer.EnqueuePass(m_DiffuseShadingPass);
+        }
+
+        public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+        {
+            var camera = renderingData.cameraData.camera;
+            var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(camera, SloanePixelartCamera.CameraTarget.CastCamera);
+
+            m_DiffuseShadingPass.SetTargetBuffer(pixelartCamera.GetBuffer(TargetBuffer.Diffuse));
+            m_DiffuseShadingPass.SetSourceBuffer(pixelartCamera.GetBuffer(TargetBuffer.Albedo));
         }
     }
 
@@ -45,7 +52,8 @@ namespace Sloane
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, (float)(pixelartCamera.DownSamplingScale / 2 + 1) / pixelartCamera.DownSamplingScale);
+                cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, (float)(pixelartCamera.DownSamplingScale / 2 + 1) / pixelartCamera.DownSamplingScale + 1.0f / 
+                (pixelartCamera.DownSamplingScale * pixelartCamera.DownSamplingScale));
                 cmd.SetGlobalInt(ShaderPropertyStorage.AdditionalLightCount, renderingData.lightData.additionalLightsCount);
             }
 

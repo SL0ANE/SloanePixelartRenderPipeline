@@ -4,6 +4,7 @@ Shader "Sloane/Pixelart/Default"
     {
         _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _LocalUnitScale("Local Unit Scale", Int) = 1
+        _MainLightLevel("Main Light Level", Int) = 2
     }
     SubShader
     {
@@ -29,6 +30,7 @@ Shader "Sloane/Pixelart/Default"
             CBUFFER_START(UnityPerMaterial)
             float4 _BaseColor;
             int _LocalUnitScale;
+            int _MainLightLevel;
             CBUFFER_END
 
             #pragma multi_compile_instancing
@@ -81,51 +83,6 @@ Shader "Sloane/Pixelart/Default"
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitForwardPass.hlsl"
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "GBuffer"
-            Tags
-            {
-                "LightMode" = "UniversalGBuffer"
-            }
-
-            HLSLPROGRAM
-            #pragma target 4.5
-
-            // Deferred Rendering Path does not support the OpenGL-based graphics API:
-            // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
-            #pragma exclude_renderers gles3 glcore
-
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex UnlitPassVertex
-            #pragma fragment UnlitPassFragment
-
-            // -------------------------------------
-            // Material Keywords
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ALPHAMODULATE_ON
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
-            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
-            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
-            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
-
-            //--------------------------------------
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitGBufferPass.hlsl"
             ENDHLSL
         }
 

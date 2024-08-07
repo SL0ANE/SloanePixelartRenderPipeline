@@ -10,9 +10,11 @@ namespace Sloane
         Depth = 0,
         Albedo = 1,
         Normal = 2,
-        ConnectivityDetail = 3,
-        ConnectivityResult = 4,
-        Diffuse = 5,
+        PhysicalProperty = 3,   // 光滑度，金属度
+        PaletteProperty = 4,    // 主光源级数，dither灰度
+        ConnectivityDetail = 5,
+        ConnectivityResult = 6,
+        Diffuse = 7,
         Max,
     }
 
@@ -21,12 +23,12 @@ namespace Sloane
     {
         Start = -1,
         MarkerDepth = 0,
-        StageRenderObjects = 2,
-        StagePostBeforeDownSampling = 2,
-        MarkerConnectivityDetail = 3,
-        MarkerConnectivityResult = 4,
-        StagePostAfterDownSampling = 5,
-        Max = 3,
+        StageRenderObjects = 4,
+        StagePostBeforeDownSampling = 4,
+        MarkerConnectivityDetail = 5,
+        MarkerConnectivityResult = 6,
+        StagePostAfterDownSampling = 7,
+        Max,
     }
 
     public static class TargetBufferUtil

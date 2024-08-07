@@ -10,8 +10,6 @@ namespace Sloane
     {
         [SerializeField]
         private TargetBuffer m_TargerBuffer;
-        [SerializeField, HideInInspector]
-        private ComputeShader m_DownSamplingComputeShader;
         private SloanePixelartDebugRendererFeaturePass m_DebugPass;
 
         public override void Create()

@@ -15,6 +15,11 @@ namespace Sloane
         public static readonly int AdditionalLightCount = Shader.PropertyToID("_AdditionalLightCount");
         public static readonly int ConnectivityAntialiasingThreshold = Shader.PropertyToID("_ConnectivityAntialiasingThreshold");
         public static readonly int Threshold = Shader.PropertyToID("_Threshold");
+        public static readonly int Palette = Shader.PropertyToID("_Palette");
+        public static readonly int Count = Shader.PropertyToID("_Count");
+        public static readonly int Resolution = Shader.PropertyToID("_Resolution");
+        public static readonly int OutputBuffer = Shader.PropertyToID("_OutputBuffer");
+        public static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
         public static readonly int ConnectivityMap = Shader.PropertyToID("_ConnectivityMap");
         public static readonly int PrevConnectivityMap = Shader.PropertyToID("_PrevConnectivityMap");

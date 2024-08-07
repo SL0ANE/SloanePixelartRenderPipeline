@@ -7,22 +7,23 @@ using UnityEngine.Rendering.Universal;
 
 namespace Sloane
 {
+    // Well actually
+    public struct ShaderInputBuffer
+    {
+        public int BufferName;
+        public RenderTargetIdentifier BufferIdentifier;
+    }
+
     public class ComputeShaderPass : ScriptableRenderPass
     {
-        // Well actually
-        private struct ComputeShaderBuffer
-        {
-            public int BufferName;
-            public int Width;
-            public int Height;
-            public RenderTargetIdentifier BufferIdentifier;
-        }
 
         static ProfilingSampler m_ProfilingSampler;
         ComputeShader m_ComputeShader;
         int m_ComputeShaderKernelIndex;
-        ComputeShaderBuffer m_TargetBuffer;
-        List<ComputeShaderBuffer> m_SourceBuffers;
+        ShaderInputBuffer m_TargetBuffer;
+        int m_TargetWidth;
+        int m_TargetHeight;
+        List<ShaderInputBuffer> m_SourceBuffers;
         Action<CommandBuffer, RenderingData, ComputeShader> m_CallbackBeforeDispatch;
         Action<CommandBuffer, RenderingData, ComputeShader> m_CallbackAfterDispatch;
         Vector2Int m_ThreadNum;
@@ -31,7 +32,7 @@ namespace Sloane
             m_ComputeShader = computeShader;
             m_ComputeShaderKernelIndex = m_ComputeShader.FindKernel(kernelName);
             m_ProfilingSampler = new ProfilingSampler(profilingName);
-            m_SourceBuffers = new List<ComputeShaderBuffer>();
+            m_SourceBuffers = new List<ShaderInputBuffer>();
 
             m_CallbackBeforeDispatch = callbackBeforeDispatch;
             m_CallbackAfterDispatch = callbackAfterDispatch;
@@ -51,13 +52,14 @@ namespace Sloane
 
         public void SetTargetBuffer(int name, RenderTargetIdentifier identifier, int width, int height)
         {
-            m_TargetBuffer = new ComputeShaderBuffer()
+            m_TargetBuffer = new ShaderInputBuffer()
             {
                 BufferName = name,
-                Width = width,
-                Height = height,
                 BufferIdentifier = identifier
             };
+
+            m_TargetWidth = width;
+            m_TargetHeight = height;
         }
 
         public void AddSourceBuffer(int name, RenderTexture buffer)
@@ -77,11 +79,9 @@ namespace Sloane
 
         public void AddSourceBuffer(int name, RenderTargetIdentifier identifier, int width, int height)
         {
-            var sourceBuffer = new ComputeShaderBuffer()
+            var sourceBuffer = new ShaderInputBuffer()
             {
                 BufferName = name,
-                Width = width,
-                Height = height,
                 BufferIdentifier = identifier
             };
 
@@ -95,19 +95,19 @@ namespace Sloane
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 m_CallbackBeforeDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
-                
+
                 foreach (var buffer in m_SourceBuffers)
                 {
                     cmd.SetComputeTextureParam(m_ComputeShader, m_ComputeShaderKernelIndex, buffer.BufferName, buffer.BufferIdentifier);
                 }
 
                 cmd.SetComputeTextureParam(m_ComputeShader, m_ComputeShaderKernelIndex, m_TargetBuffer.BufferName, m_TargetBuffer.BufferIdentifier);
-                cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Width, m_TargetBuffer.Width);
-                cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Height, m_TargetBuffer.Height);
+                cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Width, m_TargetWidth);
+                cmd.SetComputeIntParam(m_ComputeShader, ShaderPropertyStorage.Height, m_TargetHeight);
                 cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
 
                 // cmd.SetRenderTarget(m_TargetBuffer.BufferIdentifier);
-                cmd.DispatchCompute(m_ComputeShader, m_ComputeShaderKernelIndex, Mathf.CeilToInt((float)m_TargetBuffer.Width / m_ThreadNum.x), Mathf.CeilToInt((float)m_TargetBuffer.Height / m_ThreadNum.y), 1);
+                cmd.DispatchCompute(m_ComputeShader, m_ComputeShaderKernelIndex, Mathf.CeilToInt((float)m_TargetWidth / m_ThreadNum.x), Mathf.CeilToInt((float)m_TargetHeight / m_ThreadNum.y), 1);
 
                 m_CallbackAfterDispatch?.Invoke(cmd, renderingData, m_ComputeShader);
             }
