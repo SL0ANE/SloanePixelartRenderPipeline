@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8551405505987417784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ca9f37a59a84040b80180b77670416, type: 3}
+  m_Name: BeforeRender
+  m_EditorClassIdentifier: 
+  m_Active: 1
 --- !u!114 &-7620938903301614757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15,6 +28,7 @@ MonoBehaviour:
   m_Active: 1
   m_DiffuseShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa,
     type: 3}
+  m_AAScaler: 1.6
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,12 +76,13 @@ MonoBehaviour:
       type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
+  - {fileID: -8551405505987417784}
   - {fileID: -3698282000451687298}
   - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
   - {fileID: -3125560631150118436}
   - {fileID: 5439611315726938619}
-  m_RendererFeatureMap: 7e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4fb7119deab617d4b
+  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4fb7119deab617d4b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -93,10 +108,10 @@ MonoBehaviour:
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_DefaultStencilState:
     overrideStencilState: 0
     stencilReference: 0
@@ -105,7 +120,7 @@ MonoBehaviour:
     failOperation: 0
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
-  m_RenderingMode: 1
+  m_RenderingMode: 0
   m_DepthPrimingMode: 0
   m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 1
@@ -156,7 +171,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3164c81cb78b3ad43923215828d3caba, type: 3}
-  m_Name: SloanePixelartColorCorrectionRendererFeature
+  m_Name: ColorCorrection
   m_EditorClassIdentifier: 
   m_Active: 1
   m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,

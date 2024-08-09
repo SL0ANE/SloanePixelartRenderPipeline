@@ -1,0 +1,11 @@
+float4x4 _CameraMatrixV;
+float4x4 _CameraMatrixVP;
+float4x4 _CameraMatrixInvV;
+float4x4 _CameraMatrixInvVP;
+
+float _UnitSize;
+
+#define PIXELART_CAMERA_MATRIX_V _CameraMatrixV
+#define PIXELART_CAMERA_MATRIX_VP _CameraMatrixVP
+#define PIXELART_CAMERA_MATRIX_I_V _CameraMatrixInvV
+#define PIXELART_CAMERA_MATRIX_I_VP _CameraMatrixInvVP

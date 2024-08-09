@@ -20,6 +20,9 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _SHADOWS_SOFT
+
+            #include "../Includes/Inputs/CameraParams.hlsl"
             #include "../Includes/Math.hlsl"
             #include "../Includes/Blit.hlsl"
             #include "../Includes/Transform.hlsl"
@@ -41,7 +44,7 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
 
                 if(level > 0.0)
                 {
-                    ndotl = pow(ndotl, 1.0 / 2.2);
+                    ndotl = pow(ndotl * light.shadowAttenuation, 1.0 / 2.2);
                 
                     ndotl = multiStep(ndotl, level, 0.0, 0.0);
                     float singleLevel = 1.0 / (level - 1.0);
@@ -62,14 +65,20 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
                 float sceneRawDepth = tex2D(_DepthBuffer, uv).r;
 
                 float3 positionWS = GetWorldPositionWithDepth(uv, sceneRawDepth);
+                float4 positionCS = mul(PIXELART_CAMERA_MATRIX_VP, float4(positionWS, 1.0));
                 float3 normalWS = tex2D(_NormalBuffer, uv).xyz;
-                float connect = tex2D(_ConnectivityResultBuffer, uv).r;
+                float connect = tex2D(_ConnectivityResultBuffer, uv).g;
                 float3 outputColor = float3(0.0, 0.0, 0.0);
 
                 float4 paletteProp = tex2D(_PalettePropertyBuffer, uv);
                 float mainLightLevel = paletteProp.r * 255.0;
 
-                Light mainLight = GetMainLight(TransformWorldToShadowCoord(positionWS));
+                VertexPositionInputs vertexInput = (VertexPositionInputs)0;
+				vertexInput.positionWS = positionWS;
+				vertexInput.positionCS = positionCS;
+				float4 shadowCoord = GetShadowCoord(vertexInput);
+
+                Light mainLight = GetMainLight(shadowCoord);
                 mainLight.distanceAttenuation = 1.0;
                 outputColor += DiffuseShading(mainLight, normalWS, connect, mainLightLevel, 0.0);
 
@@ -80,7 +89,7 @@ Shader "Hidden/Sloane/Pixelart/DiffuseShading"
 
                 outputColor *= tex2D(_AlbedoBuffer, uv).rgb;
 
-                // return float4((positionWS + float3(0.0, 0.0, 11.0)) * 0.5 + 0.5, 1.0);
+                // return float4((positionWS / 256), 1.0);
                 return float4(outputColor, 1.0);
             }
             ENDHLSL

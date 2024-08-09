@@ -9,14 +9,14 @@ float3 GetWorldPositionWithDepth(float2 uv, float sceneRawDepth)
     {
         float sceneDepthVS = lerp(_ProjectionParams.y, _ProjectionParams.z, sceneRawDepth);
         float2 viewRayEndPosVS_xy = float2(unity_OrthoParams.xy * (uv * 2.0 - 1.0));
-        float3 posVSOrtho = float3(viewRayEndPosVS_xy, sceneDepthVS);
-
-        worldPos = mul(unity_CameraToWorld, float4(posVSOrtho, 1)).xyz;
+        float3 posVSOrtho = float3(viewRayEndPosVS_xy, -sceneDepthVS);
+        
+        worldPos = mul(PIXELART_CAMERA_MATRIX_I_V, float4(posVSOrtho, 1)).xyz;
     }
     else
     {
         float4 ndc = float4(uv * 2.0 - 1.0, sceneRawDepth * 2.0 - 1.0, 1);
-        float4 pos = mul(UNITY_MATRIX_I_VP, ndc);
+        float4 pos = mul(PIXELART_CAMERA_MATRIX_I_VP, ndc);
         worldPos = pos.xyz / pos.w;
     }
 

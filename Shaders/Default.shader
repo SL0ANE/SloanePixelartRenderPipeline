@@ -14,12 +14,12 @@ Shader "Sloane/Pixelart/Default"
         #define ALIGN_TO_PIXEL
         #define UNIT_SCALE
 
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-
         ENDHLSL
 
         Pass
         {
+            Name "PixelartOpaque"
+
             Tags
             {
                 "LightMode" = "PixelartOpaque"
@@ -27,15 +27,8 @@ Shader "Sloane/Pixelart/Default"
 
             HLSLPROGRAM
 
-            CBUFFER_START(UnityPerMaterial)
-            float4 _BaseColor;
-            int _LocalUnitScale;
-            int _MainLightLevel;
-            CBUFFER_END
-
             #pragma multi_compile_instancing
-            #include "Includes/Common.hlsl"
-            #include "Includes/DefaultPass.hlsl"
+            #include "Includes/Passes/DefaultPass.hlsl"
 
             #pragma vertex PixelartBaseVert
             #pragma fragment DefaultFrag
@@ -45,7 +38,12 @@ Shader "Sloane/Pixelart/Default"
 
         Pass
         {
-            Name "Unlit"
+            Name "PixelartPreview"
+
+            Tags
+            {
+                "LightMode" = "PixelartPreview"
+            }
 
             // -------------------------------------
             // Render State Commands
@@ -88,116 +86,26 @@ Shader "Sloane/Pixelart/Default"
 
         Pass
         {
-            Name "DepthOnly"
+            Name "ShadowCaster"
+
             Tags
             {
-                "LightMode" = "DepthOnly"
+                "LightMode" = "ShadowCaster"
             }
 
-            // -------------------------------------
-            // Render State Commands
-            ZWrite On
-            ColorMask R
+			ZWrite On
+            Blend One Zero
+            ZTest LEqual
+            ColorMask 0
 
             HLSLPROGRAM
-            #pragma target 2.0
 
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex DepthOnlyVertex
-            #pragma fragment DepthOnlyFragment
-
-            // -------------------------------------
-            // Material Keywords
-            #pragma shader_feature_local _ALPHATEST_ON
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
-
-            //--------------------------------------
-            // GPU Instancing
             #pragma multi_compile_instancing
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #include "Includes/Passes/ShadowPass.hlsl"
 
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "DepthNormalsOnly"
-            Tags
-            {
-                "LightMode" = "DepthNormalsOnly"
-            }
-
-            // -------------------------------------
-            // Render State Commands
-            ZWrite On
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex DepthNormalsVertex
-            #pragma fragment DepthNormalsFragment
-
-            // -------------------------------------
-            // Material Keywords
-            #pragma shader_feature_local _ALPHATEST_ON
-
-            // -------------------------------------
-            // Universal Pipeline keywords
-            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
-            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
-
-            //--------------------------------------
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitDepthNormalsPass.hlsl"
-            ENDHLSL
-        }
-
-        // This pass it not used during regular rendering, only for lightmap baking.
-        Pass
-        {
-            Name "Meta"
-            Tags
-            {
-                "LightMode" = "Meta"
-            }
-
-            // -------------------------------------
-            // Render State Commands
-            Cull Off
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex UniversalVertexMeta
-            #pragma fragment UniversalFragmentMetaUnlit
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma shader_feature EDITOR_VISUALIZATION
-
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitMetaPass.hlsl"
+            #pragma vertex ShadowVert
+            #pragma fragment ShadowFrag
+            
             ENDHLSL
         }
     }

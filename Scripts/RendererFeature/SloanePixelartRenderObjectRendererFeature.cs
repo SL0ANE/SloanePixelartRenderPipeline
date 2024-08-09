@@ -60,19 +60,9 @@ namespace Sloane
 
             SortingCriteria sortingCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
             DrawingSettings drawingSettings = CreateDrawingSettings(TargetShader, ref renderingData, sortingCriteria);
-            float unitSize = pixelartCamera.UnitSize;
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                // Align the camera to the unit size so the shape won't dither when the camera moves.
-                
-                Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
-                cmd.SetGlobalMatrix(ShaderPropertyStorage.ViewMatrix, viewMatrix);
-                cmd.SetGlobalMatrix(ShaderPropertyStorage.InvViewMatrix, viewMatrix.inverse);
-                var proj = renderingData.cameraData.GetProjectionMatrix();
-                cmd.SetProjectionMatrix(proj);
-                cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
-
                 cmd.SetRenderTarget(pixelartCamera.MultiBufferIdentifiers, pixelartCamera.GetBuffer(TargetBuffer.Depth));
                 cmd.ClearRenderTarget(true, true, Color.black, 1);
                 context.ExecuteCommandBuffer(cmd);

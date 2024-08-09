@@ -1,9 +1,13 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 #pragma kernel Main
+#define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
+
 Texture2D<float4> _ConnectivityMap;
-RWTexture2D<float> _ConnectivityResultBuffer;
+Texture2D<float> _DepthBuffer;
+RWTexture2D<float2> _ConnectivityResultBuffer;
 uint _Width;
 uint _Height;
 uint _SamplingScale;
@@ -16,13 +20,25 @@ void Main (uint3 id : SV_DispatchThreadID)
     uint2 center = uint2(id.x * _SamplingScale + uint(halfScale), id.y * _SamplingScale + uint(halfScale));
     float fakeFloot = 0.0;
     int data;
-    float totalCount = 0;
-    
+    float totalConnectedCount = 0;
+    float totalConnectedOrCloserCount = 0;
+    float centerDepth = _DepthBuffer[center];
+    #if defined(UNITY_REVERSED_Z)
+    centerDepth = 1.0 - centerDepth;
+    #endif
+    centerDepth = LINEAR_DEPTH(centerDepth);
+
     for(int i = -halfScale; i <= halfScale; i++)
     {
         for(int j = -halfScale; j <= halfScale; j++)
         {
-            float4 rawData = _ConnectivityMap[uint2(int2(center) + int2(i, j))];
+            uint2 coord = uint2(int2(center) + int2(i, j));
+            float4 rawData = _ConnectivityMap[coord];
+            float currentDepth = _DepthBuffer[coord];
+            #if defined(UNITY_REVERSED_Z)
+            currentDepth = 1.0 - currentDepth;
+            #endif
+            currentDepth = LINEAR_DEPTH(currentDepth);
             UnpackFloatInt8bit(rawData.r, 256.0, fakeFloot, data);
             int targetConnectedToCenter = (data & (1 << 5)) > 0 ? 1 : 0;
 
@@ -35,9 +51,10 @@ void Main (uint3 id : SV_DispatchThreadID)
             UnpackFloatInt8bit(rawData.a, 256.0, fakeFloot, data);
             targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
 
-            if(targetConnectedToCenter > 0) totalCount += 1.0;
+            if(targetConnectedToCenter > 0) totalConnectedCount += 1.0;
+            if(targetConnectedToCenter > 0 || currentDepth < centerDepth) totalConnectedOrCloserCount += 1.0;
         }
     }
 
-    _ConnectivityResultBuffer[id.xy] = totalCount / float(_SamplingScale * _SamplingScale);
+    _ConnectivityResultBuffer[id.xy] = float2(totalConnectedCount / float(_SamplingScale * _SamplingScale), totalConnectedOrCloserCount / float(_SamplingScale * _SamplingScale));
 }

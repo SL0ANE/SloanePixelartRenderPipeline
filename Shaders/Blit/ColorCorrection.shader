@@ -21,12 +21,11 @@ Shader "Hidden/Sloane/Pixelart/ColorCorrection"
 
             #include "../Includes/Math.hlsl"
             #include "../Includes/Blit.hlsl"
-            #include "../Includes/Transform.hlsl"
             #include "../Includes/Lighting.hlsl"
 
             sampler2D _MainTex;
-            TEXTURE2D(_Palette);
-            SamplerState palette_point_clamp_sampler;
+            Texture2D _Palette;
+            SamplerState sampler_Palette_point_clamp_sampler;
             int _Resolution;
 
             half4 Fragment(Varyings input) : SV_Target
@@ -39,7 +38,7 @@ Shader "Hidden/Sloane/Pixelart/ColorCorrection"
                 outputColor = clamp(outputColor, 0.001, 0.999);
 
                 float2 targetCoord = float2(((floor(outputColor.r * res) + 0.5) / res + floor(outputColor.b * res)) / res, 1.0 - floor(outputColor.g * res) / res);
-                outputColor = _Palette.Sample(palette_point_clamp_sampler, targetCoord).rgb;
+                outputColor = _Palette.Sample(sampler_Palette_point_clamp_sampler, targetCoord).rgb;
 
                 return float4(outputColor, 1.0);
             }

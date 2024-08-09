@@ -49,11 +49,14 @@ namespace Sloane
                 if (m_TargetBuffer == m_SourceBuffer)
                 {
                     cmd.GetTemporaryRT(m_DuplicateCaseBlitBufferId, m_TargetBuffer.descriptor);
+
                     cmd.SetRenderTarget(m_DuplicateCaseBlitBufferId);
                     cmd.Blit(m_SourceBuffer, m_DuplicateCaseBlitBufferId);
+
                     cmd.SetRenderTarget(m_TargetBuffer);
                     cmd.SetGlobalTexture(ShaderPropertyStorage.MainTex, m_DuplicateCaseBlitBufferId);
                     cmd.Blit(m_DuplicateCaseBlitBufferId, m_TargetBuffer, m_Material);
+
                     cmd.ReleaseTemporaryRT(m_DuplicateCaseBlitBufferId);
                 }
                 else

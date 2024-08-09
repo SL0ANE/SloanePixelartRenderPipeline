@@ -1,15 +1,4 @@
-#include "Buffers.hlsl"
-
-CBUFFER_START(UnityMetaPass)
-#ifdef TEXTURE_BASED
-    
-#endif
-CBUFFER_END
-
-float _UnitSize;
-
-#include "Structures.hlsl"
-
+#include "../Inputs/CameraParams.hlsl"
 #define UNITSNAP(coord, size) round(coord / size) * size
 
 Varyings PixelartBaseVert(Attributes input)
@@ -20,7 +9,7 @@ Varyings PixelartBaseVert(Attributes input)
 
 #ifdef ALIGN_TO_PIXEL
     float3 originWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
-    float3 originVS = TransformWorldToView(originWS);
+    float3 originVS = mul(PIXELART_CAMERA_MATRIX_V, float4(originWS, 1.0));
 #ifdef UNIT_SCALE
     float unitSize = _UnitSize / _LocalUnitScale;
     float3 originVSOffset = float3(UNITSNAP(originVS.x, unitSize), UNITSNAP(originVS.y, unitSize), originVS.z) - originVS;
@@ -32,10 +21,10 @@ Varyings PixelartBaseVert(Attributes input)
     output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
 
 #ifdef ALIGN_TO_PIXEL
-    output.positionVS = TransformWorldToView(output.positionWS) + originVSOffset;
+    output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0)) + originVSOffset;
     // output.positionVS = float3(UNITSNAP(output.positionVS.x, _UnitSize), UNITSNAP(output.positionVS.y, _UnitSize), output.positionVS.z);
 #else
-    output.positionVS = TransformWorldToView(output.positionWS);
+    output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0));
 #endif
     output.positionCS = mul(GetViewToHClipMatrix(), float4(output.positionVS, 1.0));
 

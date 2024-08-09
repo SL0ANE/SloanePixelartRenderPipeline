@@ -10,12 +10,14 @@ namespace Sloane
     {
         [SerializeField]
         private Shader m_DiffuseShadingShader;
+        [SerializeField]
+        private float m_AAScaler = 1.75f;
         private BeforeShadingPass m_BeforeShadingPass;
         private ShaderBlitPass m_DiffuseShadingPass;
 
         public override void Create()
         {
-            m_BeforeShadingPass = new BeforeShadingPass()
+            m_BeforeShadingPass = new BeforeShadingPass(m_AAScaler)
             {
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
             };
@@ -44,6 +46,12 @@ namespace Sloane
     public class BeforeShadingPass : ScriptableRenderPass
     {
         static ProfilingSampler m_ProfilingSampler = new ProfilingSampler("SloaneBeforeShadingPass");
+        private float m_AAScaler;
+        
+        public BeforeShadingPass(float aaScaler)
+        {
+            m_AAScaler = aaScaler;
+        }
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var cmd = CommandBufferPool.Get();
@@ -52,8 +60,7 @@ namespace Sloane
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, (float)(pixelartCamera.DownSamplingScale / 2 + 1) / pixelartCamera.DownSamplingScale + 1.0f / 
-                (pixelartCamera.DownSamplingScale * pixelartCamera.DownSamplingScale));
+                cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, (float)(pixelartCamera.DownSamplingScale / 2 + m_AAScaler) / pixelartCamera.DownSamplingScale);
                 cmd.SetGlobalInt(ShaderPropertyStorage.AdditionalLightCount, renderingData.lightData.additionalLightsCount);
             }
 
