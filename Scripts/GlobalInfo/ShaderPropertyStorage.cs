@@ -13,6 +13,7 @@ namespace Sloane
         public static readonly int UnitSize = Shader.PropertyToID("_UnitSize");
         public static readonly int Width = Shader.PropertyToID("_Width");
         public static readonly int Height = Shader.PropertyToID("_Height");
+        public static readonly int ScreenParams = Shader.PropertyToID("_ScreenParams");
         public static readonly int SamplingScale = Shader.PropertyToID("_SamplingScale");
         public static readonly int Target = Shader.PropertyToID("_Target");
         public static readonly int Source = Shader.PropertyToID("_Source");

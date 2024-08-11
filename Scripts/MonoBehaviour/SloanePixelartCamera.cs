@@ -23,7 +23,7 @@ namespace Sloane
         [SerializeField]
         int m_DownSamplingScale = 5;
         [SerializeField, HideInInspector]
-        Camera m_CastCamera;
+        SloanePixelartCastCamera m_CastCamera;
         [SerializeField, HideInInspector]
         Camera m_ThisCamera;
         [SerializeField, HideInInspector]
@@ -34,7 +34,8 @@ namespace Sloane
         RenderTexture m_ResultBuffer;
         [SerializeField, HideInInspector]
         List<RenderTexture> m_TargetBuffers;
-        RenderTargetIdentifier[] m_MultiBufferIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageRenderObjects - TargetBufferStage.MarkerDepth];
+        RenderTargetIdentifier[] m_OpaqueBuffersIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageRenderObjects - TargetBufferStage.MarkerDepth];
+        RenderTargetIdentifier[] m_ShadingBuffersIdentifiers = new RenderTargetIdentifier[TargetBufferStage.StageShading - TargetBufferStage.MarkerConnectivityResult];
 
         public Vector2Int TextureResolution => m_TargetResolution * m_DownSamplingScale;
         public int TextureWidth => m_TargetResolution.x * m_DownSamplingScale;
@@ -43,9 +44,10 @@ namespace Sloane
         public int TargetHeight => m_TargetResolution.y;
         public int DownSamplingScale => m_DownSamplingScale;
         public RenderTexture ResultBuffer => m_ResultBuffer;
-        public float UnitSize => m_CastCamera.orthographicSize * 2.0f / TargetHeight;
+        public float UnitSize => m_CastCamera.Camera.orthographicSize * 2.0f / TargetHeight;
 
-        public RenderTargetIdentifier[] MultiBufferIdentifiers => m_MultiBufferIdentifiers;
+        public RenderTargetIdentifier[] OpaqueBuffersIdentifiers => m_OpaqueBuffersIdentifiers;
+        public RenderTargetIdentifier[] ShadingBuffersIdentifiers => m_ShadingBuffersIdentifiers;
 
         public enum CameraTarget
         {
@@ -75,7 +77,7 @@ namespace Sloane
             GetBuffers();
 
             m_CameraMap.Add(m_ThisCamera, this);
-            m_CastCameraMap.Add(m_CastCamera, this);
+            m_CastCameraMap.Add(m_CastCamera.Camera, this);
             m_CastCamera.enabled = true;
         }
 
@@ -84,7 +86,7 @@ namespace Sloane
             ReleaseBuffers();
 
             m_CameraMap.Remove(m_ThisCamera);
-            m_CastCameraMap.Remove(m_CastCamera);
+            m_CastCameraMap.Remove(m_CastCamera.Camera);
             m_CastCamera.enabled = false;
         }
 
@@ -132,7 +134,7 @@ namespace Sloane
 
             if (m_ResultBuffer != null)
             {
-                m_CastCamera.targetTexture = null;
+                m_CastCamera.Camera.targetTexture = null;
                 RenderTexture.ReleaseTemporary(m_ResultBuffer);
                 m_ResultBuffer = null;
             }
@@ -181,7 +183,7 @@ namespace Sloane
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
                 m_TargetBuffers[i].Create();
-                m_MultiBufferIdentifiers[i - (int)TargetBufferStage.MarkerDepth - 1] = m_TargetBuffers[i];
+                m_OpaqueBuffersIdentifiers[i - (int)TargetBufferStage.MarkerDepth - 1] = m_TargetBuffers[i];
             }
 
             for (int i = (int)TargetBufferStage.StageRenderObjects + 1; i <= (int)TargetBufferStage.StagePostBeforeDownSampling; i++)
@@ -212,7 +214,7 @@ namespace Sloane
             {
                 depthBufferBits = 0,
                 enableRandomWrite = true,
-                graphicsFormat = GraphicsFormat.R8G8_UNorm,
+                graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D
@@ -235,11 +237,13 @@ namespace Sloane
                 dimension = TextureDimension.Tex2D
             };
 
-            for (int i = (int)TargetBufferStage.MarkerConnectivityResult + 1; i <= (int)TargetBufferStage.StagePostAfterDownSampling; i++)
+            for (int i = (int)TargetBufferStage.MarkerConnectivityResult + 1; i <= (int)TargetBufferStage.StageShading; i++)
             {
                 m_TargetBuffers.Add(RenderTexture.GetTemporary(targetDesc));
                 m_TargetBuffers[i].filterMode = FilterMode.Point;
                 m_TargetBuffers[i].Create();
+
+                m_ShadingBuffersIdentifiers[i - (int)TargetBufferStage.MarkerConnectivityResult - 1] = m_TargetBuffers[i];
             }
 
             RenderTextureDescriptor resultDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
@@ -257,7 +261,7 @@ namespace Sloane
             m_ResultBuffer.filterMode = FilterMode.Point;
             m_ResultBuffer.Create();
 
-            m_CastCamera.targetTexture = m_ResultBuffer;
+            m_CastCamera.Camera.targetTexture = m_ResultBuffer;
         }
 
         private void InitializeCastCamera()
@@ -266,14 +270,16 @@ namespace Sloane
             {
                 GameObject castCameraObject = new GameObject("Cast Camera");
                 castCameraObject.transform.SetParent(transform, false);
-                m_CastCamera = castCameraObject.AddComponent<Camera>();
+                castCameraObject.AddComponent<Camera>();
+                m_CastCamera = castCameraObject.AddComponent<SloanePixelartCastCamera>();
+                m_CastCamera.Initialize();
                 m_CastCameraData = m_CastCamera.GetComponent<UniversalAdditionalCameraData>();
                 if (m_CastCameraData == null) m_CastCameraData = m_CastCamera.AddComponent<UniversalAdditionalCameraData>();
-                m_CastCamera.orthographicSize = 6.125f;    // Celeste
+                m_CastCamera.Camera.orthographicSize = 6.125f;    // Celeste
             }
 
-            m_CastCamera.orthographic = true;
-            m_CastCamera.depth = -64;
+            m_CastCamera.Camera.orthographic = true;
+            m_CastCamera.Camera.depth = -64;
             // m_CastCamera.enabled = false;
             m_CastCameraData.SetRenderer((int)SloanePixelartRenderer.CastCamera);
         }

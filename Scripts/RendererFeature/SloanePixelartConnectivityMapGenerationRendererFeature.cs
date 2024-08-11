@@ -49,10 +49,12 @@ namespace Sloane
 
             var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
             var connectivityMap = pixelartCamera.GetBuffer(TargetBuffer.ConnectivityDetail);
+            var depthBuffer = pixelartCamera.GetBuffer(TargetBuffer.Depth);
+            var normalBuffer = pixelartCamera.GetBuffer(TargetBuffer.Normal);
 
             m_GenerationPass.ClearSourceBuffers();
-            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Depth), pixelartCamera.GetBuffer(TargetBuffer.Depth));
-            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), pixelartCamera.GetBuffer(TargetBuffer.Normal));
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Depth), depthBuffer);
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), normalBuffer);
             m_GenerationPass.SetTargetBuffer(ShaderPropertyStorage.ConnectivityMap, connectivityMap);
             renderer.EnqueuePass(m_GenerationPass);
 
@@ -65,6 +67,8 @@ namespace Sloane
 
             m_ResultingPass.ClearSourceBuffers();
             m_ResultingPass.AddSourceBuffer(ShaderPropertyStorage.ConnectivityMap, connectivityMap);
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Depth), depthBuffer);
+            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), normalBuffer);
             m_ResultingPass.SetTargetBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.ConnectivityResult), pixelartCamera.GetBuffer(TargetBuffer.ConnectivityResult));
             renderer.EnqueuePass(m_ResultingPass);
         }
@@ -95,6 +99,7 @@ namespace Sloane
         private void BeforeResultDispatch(CommandBuffer cmd, RenderingData renderingData, ComputeShader computeShader)
         {
             var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
+            cmd.SetComputeFloatParam(computeShader, ShaderPropertyStorage.Threshold, m_Threshold);
             cmd.SetComputeIntParam(computeShader, ShaderPropertyStorage.SamplingScale, pixelartCamera.DownSamplingScale);
         }
 

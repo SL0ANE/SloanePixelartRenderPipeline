@@ -38,3 +38,7 @@ Varyings Vert(Attributes input)
     output.texcoord = uv;
     return output;
 }
+
+#define GET_BLIT_UV \
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input); \
+float2 uv = input.texcoord; \

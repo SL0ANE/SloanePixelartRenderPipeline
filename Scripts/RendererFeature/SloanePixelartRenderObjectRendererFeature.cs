@@ -63,7 +63,7 @@ namespace Sloane
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                cmd.SetRenderTarget(pixelartCamera.MultiBufferIdentifiers, pixelartCamera.GetBuffer(TargetBuffer.Depth));
+                cmd.SetRenderTarget(pixelartCamera.OpaqueBuffersIdentifiers, pixelartCamera.GetBuffer(TargetBuffer.Depth));
                 cmd.ClearRenderTarget(true, true, Color.black, 1);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();

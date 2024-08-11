@@ -1,21 +1,25 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "../../Shaders/Includes/Inputs/CameraParams.hlsl"
+#include "../../Shaders/Includes/Transform.hlsl"
 
+#define BUFFER_WIDTH (_Width * _SamplingScale)
+#define BUFFER_HEIGHT (_Height * _SamplingScale)
+
+uint _SamplingScale;
+int _Width;
+int _Height;
+#include "../../Shaders/Includes/Connectivity.hlsl"
 #pragma kernel Main
-#define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
 
 Texture2D<float4> _ConnectivityMap;
-Texture2D<float> _DepthBuffer;
-RWTexture2D<float2> _ConnectivityResultBuffer;
-uint _Width;
-uint _Height;
-uint _SamplingScale;
+RWTexture2D<float4> _ConnectivityResultBuffer;
 
 [numthreads(8,8,1)]
 void Main (uint3 id : SV_DispatchThreadID)
 {
-    if(id.x > _Width || id.y > _Height) return;
+    if(id.x > uint(_Width) || id.y > uint(_Height)) return;
     int halfScale = int(_SamplingScale / 2);
     uint2 center = uint2(id.x * _SamplingScale + uint(halfScale), id.y * _SamplingScale + uint(halfScale));
     float fakeFloot = 0.0;
@@ -56,5 +60,23 @@ void Main (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    _ConnectivityResultBuffer[id.xy] = float2(totalConnectedCount / float(_SamplingScale * _SamplingScale), totalConnectedOrCloserCount / float(_SamplingScale * _SamplingScale));
+    uint connectedRight = 0;
+    uint closerRight = 0;
+    CheckConnected(center, center + int2(_SamplingScale, 0), connectedRight, closerRight);
+
+    uint connectedLeft = 0;
+    uint closerLeft = 0;
+    CheckConnected(center, center - int2(_SamplingScale, 0), connectedLeft, closerLeft);
+
+    uint connectedUp = 0;
+    uint closerUp = 0;
+    CheckConnected(center, center + int2(0, _SamplingScale), connectedUp, closerUp);
+
+    uint connectedDown = 0;
+    uint closerDown = 0;
+    CheckConnected(center, center - int2(0, _SamplingScale), connectedDown, closerDown);
+    
+    float4 output = float4(totalConnectedCount / float(_SamplingScale * _SamplingScale), totalConnectedOrCloserCount / float(_SamplingScale * _SamplingScale), 0.0, 0.0);
+    output.a = PackFloatInt8bit(0.0, (connectedRight << 7) + (connectedLeft << 6) + (connectedUp << 5) + (connectedDown << 4) + (closerRight << 3) + (closerLeft << 2) + (closerUp << 1) + (closerDown << 0), 256.0);
+    _ConnectivityResultBuffer[id.xy] = output;
 }

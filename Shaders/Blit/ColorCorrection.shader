@@ -1,4 +1,4 @@
-Shader "Hidden/Sloane/Pixelart/ColorCorrection"
+Shader "Hidden/Sloane/Pixelart/Blit/ColorCorrection"
 {
     SubShader
     {
@@ -21,7 +21,6 @@ Shader "Hidden/Sloane/Pixelart/ColorCorrection"
 
             #include "../Includes/Math.hlsl"
             #include "../Includes/Blit.hlsl"
-            #include "../Includes/Lighting.hlsl"
 
             sampler2D _MainTex;
             Texture2D _Palette;
@@ -37,7 +36,7 @@ Shader "Hidden/Sloane/Pixelart/ColorCorrection"
                 float3 outputColor = tex2D(_MainTex, uv).rgb;
                 outputColor = clamp(outputColor, 0.001, 0.999);
 
-                float2 targetCoord = float2(((floor(outputColor.r * res) + 0.5) / res + floor(outputColor.b * res)) / res, 1.0 - floor(outputColor.g * res) / res);
+                float2 targetCoord = float2(((floor(outputColor.r * res) + 0.5) / res + floor(outputColor.b * res)) / res, 1.0 - (floor(outputColor.g * res) + 0.5) / res);
                 outputColor = _Palette.Sample(sampler_Palette_point_clamp_sampler, targetCoord).rgb;
 
                 return float4(outputColor, 1.0);

@@ -2,8 +2,11 @@ Shader "Sloane/Pixelart/Default"
 {
     Properties
     {
-        _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        [Gamma] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _LocalUnitScale("Local Unit Scale", Int) = 1
+        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+        _Metallic("Metallic", Range(0.0, 1.0)) = 0.1
+        _NormalBlendScale("Normal Blend Scale", Range(0.0, 1.0)) = 0.0
         _MainLightLevel("Main Light Level", Int) = 2
     }
     SubShader

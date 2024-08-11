@@ -1,2 +1,0 @@
-uint _AdditionalLightCount;
-float _ConnectivityAntialiasingThreshold;
