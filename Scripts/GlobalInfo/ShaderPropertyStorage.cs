@@ -25,6 +25,7 @@ namespace Sloane
         public static readonly int Resolution = Shader.PropertyToID("_Resolution");
         public static readonly int OutputBuffer = Shader.PropertyToID("_OutputBuffer");
         public static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        public static readonly int OutlineColor = Shader.PropertyToID("_OutlineColor");
 
         public static readonly int ConnectivityMap = Shader.PropertyToID("_ConnectivityMap");
         public static readonly int PrevConnectivityMap = Shader.PropertyToID("_PrevConnectivityMap");

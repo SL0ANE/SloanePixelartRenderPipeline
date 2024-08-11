@@ -9,11 +9,16 @@
 
 sampler2D _MainTex;
 sampler2D _ConnectivityResultBuffer;
+float4 _OutlineColor;
 
 float3 ApplyOutline(float2 uv)
 {
+#ifdef _OUTLINE_SOLID_COLOR
+    return _OutlineColor.rgb;
+#else
     float3 baseColor = tex2D(_MainTex, uv).rgb;
-    return baseColor * 0.5;
+    return baseColor * _OutlineColor.rgb;
+#endif
 }
 
 half4 OutlineFragment(Varyings input) : SV_Target
