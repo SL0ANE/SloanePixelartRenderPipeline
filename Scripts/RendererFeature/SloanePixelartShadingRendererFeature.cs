@@ -12,17 +12,20 @@ namespace Sloane
         [SerializeField]
         private Shader m_ShadingShader;
         [SerializeField]
+        private bool m_EnableAA = true;
+        [SerializeField]
         private float m_AAScaler = 1.75f;
         private BeforeShadingPass m_BeforeShadingPass;
         private ShaderBlitPass m_DiffuseShadingPass;
         private ShaderBlitPass m_SpecularShadingPass;
+        private ShaderBlitPass m_GlobalIlluminationShadingPass;
         private ShaderBlitPass m_CombinationPass;
 
         public override void Create()
         {
             if(m_ShadingShader == null) return;
 
-            m_BeforeShadingPass = new BeforeShadingPass(m_AAScaler)
+            m_BeforeShadingPass = new BeforeShadingPass(m_AAScaler * (m_EnableAA ? 1.0f : 0.0f))
             {
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
             };
@@ -33,6 +36,11 @@ namespace Sloane
             };
 
             m_SpecularShadingPass = new ShaderBlitPass(m_ShadingShader, "Specular Shading", null, null, 1)
+            {
+                renderPassEvent = RenderPassEvent.AfterRendering
+            };
+
+            m_GlobalIlluminationShadingPass = new ShaderBlitPass(m_ShadingShader, "Global Illumination Shading", null, null, 2)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -49,6 +57,7 @@ namespace Sloane
             renderer.EnqueuePass(m_BeforeShadingPass);
             renderer.EnqueuePass(m_DiffuseShadingPass);
             renderer.EnqueuePass(m_SpecularShadingPass);
+            renderer.EnqueuePass(m_GlobalIlluminationShadingPass);
             renderer.EnqueuePass(m_CombinationPass);
         }
 
@@ -65,6 +74,9 @@ namespace Sloane
 
             m_SpecularShadingPass.SetSourceBuffer(albedoBuffer);
             m_SpecularShadingPass.SetTargetBuffer(pixelartCamera.GetBuffer(TargetBuffer.Specular));
+
+            m_GlobalIlluminationShadingPass.SetSourceBuffer(albedoBuffer);
+            m_GlobalIlluminationShadingPass.SetTargetBuffer(pixelartCamera.GetBuffer(TargetBuffer.GlobalIllumination));
 
             m_CombinationPass.SetSourceBuffer(albedoBuffer);
             m_CombinationPass.SetTargetBuffer(renderer.cameraColorTargetHandle);
@@ -94,6 +106,7 @@ namespace Sloane
 
                 cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), pixelartCamera.GetBuffer(TargetBuffer.Diffuse));
                 cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Specular), pixelartCamera.GetBuffer(TargetBuffer.Specular));
+                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.GlobalIllumination), pixelartCamera.GetBuffer(TargetBuffer.GlobalIllumination));
             }
 
             context.ExecuteCommandBuffer(cmd);

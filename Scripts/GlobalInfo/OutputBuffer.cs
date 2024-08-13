@@ -13,11 +13,12 @@ namespace Sloane
         PhysicalProperty = 3,   // 光滑度，金属度
         ShapeProperty = 4,
         PaletteProperty = 5,    // 主光源级数，dither灰度
-        ConnectivityDetail = 6,
-        ConnectivityResult = 7,
-        Diffuse = 8,
-        Specular = 9,
-        GlobalIllumination = 10,
+        UV = 6,
+        ConnectivityDetail = 7,
+        ConnectivityResult = 8,
+        Diffuse = 9,
+        Specular = 10,
+        GlobalIllumination = 11,
         Max,
     }
 
@@ -26,12 +27,12 @@ namespace Sloane
     {
         Start = -1,
         MarkerDepth = 0,
-        StageRenderObjects = 5,
-        StagePostBeforeDownSampling = 5,
-        MarkerConnectivityDetail = 6,
-        MarkerConnectivityResult = 7,
-        StageShading = 10,
-        StagePostAfterDownSampling = 10,
+        StageRenderObjects = 6,
+        StagePostBeforeDownSampling = 6,
+        MarkerConnectivityDetail = 7,
+        MarkerConnectivityResult = 8,
+        StageShading = 11,
+        StagePostAfterDownSampling = 11,
         Max,
     }
 

@@ -4,7 +4,7 @@ float _Threshold;
 
 #define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
 
-void CheckConnected(int2 center, int2 target, inout uint connected, inout uint closer)
+void CheckConnectedDepthNormal(int2 center, int2 target, inout uint connected, inout uint closer, int step)
 {
     if(target.x >= BUFFER_WIDTH || target.y >= BUFFER_HEIGHT || target.x < 0 || target.y < 0)
     {
@@ -27,34 +27,43 @@ void CheckConnected(int2 center, int2 target, inout uint connected, inout uint c
     closer = centerDepth < targetDepth ? 1 : 0;
     connected = 1;
 
-    float2 centerUV = float2(float(center.x) / float(BUFFER_WIDTH), float(center.y) / float(BUFFER_HEIGHT));
-    float3 centerPos = GetViewPositionWithDepth(centerUV, _DepthBuffer[center]);
+    int2 prev = center;
+    int2 next;
+    for(int i = 1; i <= step; i++)
+    {
+        next = (target - center) * i / step + center;
 
-    float2 targetUV = float2(float(target.x) / float(BUFFER_WIDTH), float(target.y) / float(BUFFER_HEIGHT));
-    float3 targetPos = GetViewPositionWithDepth(targetUV, _DepthBuffer[target]);
+        float2 centerUV = float2(float(prev.x) / float(BUFFER_WIDTH), float(prev.y) / float(BUFFER_HEIGHT));
+        float3 centerPos = GetViewPositionWithDepth(centerUV, _DepthBuffer[prev]);
 
-    float3 normalCenter = _NormalBuffer[center].xyz;
-    normalCenter = TransformWorldToViewDir(normalCenter);
+        float2 targetUV = float2(float(next.x) / float(BUFFER_WIDTH), float(next.y) / float(BUFFER_HEIGHT));
+        float3 targetPos = GetViewPositionWithDepth(targetUV, _DepthBuffer[next]);
 
-    float2 pixelSpacing = (centerPos.xy - targetPos.xy);
-    float dz_x = -normalCenter.x * pixelSpacing.x / normalCenter.z;
-    float dz_y = -normalCenter.y * pixelSpacing.y / normalCenter.z;
+        float3 normalCenter = _NormalBuffer[prev].xyz;
+        normalCenter = TransformWorldToViewDir(normalCenter);
 
-    float predictDepth = centerDepth + dz_x + dz_y;
+        float2 pixelSpacing = (centerPos.xy - targetPos.xy);
+        float dz_x = -normalCenter.x * pixelSpacing.x / normalCenter.z;
+        float dz_y = -normalCenter.y * pixelSpacing.y / normalCenter.z;
 
-    float resultCenter = abs(predictDepth - targetDepth);
+        float predictDepth = centerDepth + dz_x + dz_y;
 
-    float3 normalTarget = _NormalBuffer[target].xyz;
-    normalTarget = TransformWorldToViewDir(normalTarget);
+        float resultCenter = abs(predictDepth - targetDepth);
 
-    dz_x = -normalTarget.x * pixelSpacing.x / normalTarget.z;
-    dz_y = -normalTarget.y * pixelSpacing.y / normalTarget.z;
+        float3 normalTarget = _NormalBuffer[next].xyz;
+        normalTarget = TransformWorldToViewDir(normalTarget);
 
-    predictDepth = centerDepth + dz_x + dz_y;
+        dz_x = -normalTarget.x * pixelSpacing.x / normalTarget.z;
+        dz_y = -normalTarget.y * pixelSpacing.y / normalTarget.z;
 
-    float resultTarget = abs(predictDepth - targetDepth);
+        predictDepth = centerDepth + dz_x + dz_y;
 
-    if(dot(normalTarget, normalTarget) < 0.5 && dot(normalCenter, normalCenter) >= 0.5) connected = 0;
-    else if(dot(normalTarget, normalTarget) >= 0.5 && dot(normalCenter, normalCenter) < 0.5) connected = 0;
-    else if(resultCenter > _Threshold && resultTarget > _Threshold) connected = 0;
+        float resultTarget = abs(predictDepth - targetDepth);
+
+        if(dot(normalTarget, normalTarget) < 0.5 && dot(normalCenter, normalCenter) >= 0.5) connected = 0;
+        else if(dot(normalTarget, normalTarget) >= 0.5 && dot(normalCenter, normalCenter) < 0.5) connected = 0;
+        else if(resultCenter > _Threshold && resultTarget > _Threshold) connected = 0;
+
+        if(connected == 0) return;
+    }
 }

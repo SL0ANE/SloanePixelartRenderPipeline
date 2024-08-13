@@ -13,7 +13,7 @@ CBUFFER_END
 
 #include "CommonPass.hlsl"
 
-void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal: BUFFER_NORMAL, out float4 outPhysical: BUFFER_PHYSICAL, out float4 outShape: BUFFER_SHAPE, out float4 outPalette: BUFFER_PALETTE)
+void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal: BUFFER_NORMAL, out float4 outPhysical: BUFFER_PHYSICAL, out float4 outShape: BUFFER_SHAPE, out float4 outPalette: BUFFER_PALETTE, out float4 outLightmapUV: BUFFER_LIGHTMAP_UV)
 {
     outAlbedo = _BaseColor;
     outNormal = float4(normalize(input.normalWS), 1.0);
@@ -32,4 +32,5 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
     outPhysical = physicalPropOutput;
     outShape = shapePropOutput;
     outPalette = palettePropOutput;
+    outLightmapUV = float4(input.staticLightmapUV, input.dynamicLightmapUV);
 }

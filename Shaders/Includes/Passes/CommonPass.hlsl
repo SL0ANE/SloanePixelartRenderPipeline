@@ -1,4 +1,5 @@
 #include "../Inputs/CameraParams.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #define UNITSNAP(coord, size) round(coord / size) * size
 
 Varyings PixelartBaseVert(Attributes input)
@@ -50,6 +51,11 @@ Varyings PixelartBaseVert(Attributes input)
     // output.normalWS = float3(originVSOffset) / unitSize / 0.5 + 0.5;
     output.normalWS = TransformObjectToWorldNormal(input.normalOS);
     output.tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
+
+    OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
+#ifdef DYNAMICLIGHTMAP_ON
+    output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#endif
 
     output.uv = input.uv;
 

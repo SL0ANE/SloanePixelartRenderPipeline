@@ -29,16 +29,16 @@ void Main (uint3 id : SV_DispatchThreadID)
     uint closer = 0;
     uint center = ((id.x % _SamplingScale) == (_SamplingScale / 2) && (id.y % _SamplingScale) == (_SamplingScale / 2)) ? 1 : 0;
 
-    CheckConnected(sourceCoord, sourceCoord + int2(1, 0), connected, closer);
+    CheckConnectedDepthNormal(sourceCoord, sourceCoord + int2(1, 0), connected, closer, 1);
     result.x = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckConnected(sourceCoord, sourceCoord + int2(0, 1), connected, closer);
+    CheckConnectedDepthNormal(sourceCoord, sourceCoord + int2(0, 1), connected, closer, 1);
     result.y = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckConnected(sourceCoord, sourceCoord - int2(1, 0), connected, closer);
+    CheckConnectedDepthNormal(sourceCoord, sourceCoord - int2(1, 0), connected, closer, 1);
     result.z = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
-    CheckConnected(sourceCoord, sourceCoord - int2(0, 1), connected, closer);
+    CheckConnectedDepthNormal(sourceCoord, sourceCoord - int2(0, 1), connected, closer, 1);
     result.w = PackFloatInt8bit(0.0, (connected << 7) + (closer << 6) + (center << 5), 256.0);
 
 

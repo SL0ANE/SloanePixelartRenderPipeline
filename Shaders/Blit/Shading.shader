@@ -51,7 +51,7 @@ Shader "Hidden/Sloane/Pixelart/Blit/Shading"
 
             HLSLPROGRAM
             #pragma vertex Vert
-            #pragma fragment SpecularFragment
+            #pragma fragment GlobalIlluminationFragment
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _SHADOWS_SOFT
 
             ENDHLSL

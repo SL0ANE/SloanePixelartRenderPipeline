@@ -62,19 +62,19 @@ void Main (uint3 id : SV_DispatchThreadID)
 
     uint connectedRight = 0;
     uint closerRight = 0;
-    CheckConnected(center, center + int2(_SamplingScale, 0), connectedRight, closerRight);
+    CheckConnectedDepthNormal(center, center + int2(_SamplingScale, 0), connectedRight, closerRight, _SamplingScale);
 
     uint connectedLeft = 0;
     uint closerLeft = 0;
-    CheckConnected(center, center - int2(_SamplingScale, 0), connectedLeft, closerLeft);
+    CheckConnectedDepthNormal(center, center - int2(_SamplingScale, 0), connectedLeft, closerLeft, _SamplingScale);
 
     uint connectedUp = 0;
     uint closerUp = 0;
-    CheckConnected(center, center + int2(0, _SamplingScale), connectedUp, closerUp);
+    CheckConnectedDepthNormal(center, center + int2(0, _SamplingScale), connectedUp, closerUp, _SamplingScale);
 
     uint connectedDown = 0;
     uint closerDown = 0;
-    CheckConnected(center, center - int2(0, _SamplingScale), connectedDown, closerDown);
+    CheckConnectedDepthNormal(center, center - int2(0, _SamplingScale), connectedDown, closerDown, _SamplingScale);
     
     float4 output = float4(totalConnectedCount / float(_SamplingScale * _SamplingScale), totalConnectedOrCloserCount / float(_SamplingScale * _SamplingScale), 0.0, 0.0);
     output.a = PackFloatInt8bit(0.0, (connectedRight << 7) + (connectedLeft << 6) + (connectedUp << 5) + (connectedDown << 4) + (closerRight << 3) + (closerLeft << 2) + (closerUp << 1) + (closerDown << 0), 256.0);

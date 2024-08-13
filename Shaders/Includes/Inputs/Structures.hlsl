@@ -4,8 +4,8 @@ struct Attributes
     float3 normalOS : NORMAL;
     float4 tangentOS : TANGENT;
     float2 uv : TEXCOORD0;
-    // float2 staticLightmapUV   : TEXCOORD1;
-    // float2 dynamicLightmapUV  : TEXCOORD2;
+    float2 staticLightmapUV   : TEXCOORD1;
+    float2 dynamicLightmapUV  : TEXCOORD2;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -17,6 +17,9 @@ struct Varyings
     float2 uv : TEXCOORD2;
     float3 positionWS : TEXCOORD3;
     float3 positionVS : TEXCOORD4;
+
+    float2 staticLightmapUV   : TEXCOORD5;
+    float2 dynamicLightmapUV  : TEXCOORD6;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO

@@ -18,10 +18,13 @@ sampler2D _DepthBuffer;
 sampler2D _PhysicalPropertyBuffer;
 sampler2D _ShapePropertyBuffer;
 sampler2D _PalettePropertyBuffer;
+sampler2D _LightmapUVBuffer;
+
 sampler2D _ConnectivityResultBuffer;
 
 sampler2D _DiffuseBuffer;
 sampler2D _SpecularBuffer;
+sampler2D _GlobalIlluminationBuffer;
 
 float3 DiffuseShading(Light light, float3 normal, float connect, float level, float transmission)
 {
@@ -77,6 +80,11 @@ half4 DiffuseFragment(Varyings input) : SV_Target
     return float4(outputColor, 1.0);
 }
 
+float3 GetViewDir()
+{
+    return float3(PIXELART_CAMERA_MATRIX_I_V._m02, PIXELART_CAMERA_MATRIX_I_V._m12, PIXELART_CAMERA_MATRIX_I_V._m22);
+}
+
 half3 SpecularShading(Light light, float3 normal, float3 viewDir, float3 specular, float smoothness, float expSmoothness, float level)
 {
     float3 halfVec = SafeNormalize(float3(light.direction) + float3(viewDir));
@@ -86,11 +94,6 @@ half3 SpecularShading(Light light, float3 normal, float3 viewDir, float3 specula
     modifier = multiStep(modifier, level, 0.0, 0.0);
     
     return light.color * specular * modifier * smoothness;
-}
-
-float3 GetViewDir()
-{
-    return float3(PIXELART_CAMERA_MATRIX_I_V._m02, PIXELART_CAMERA_MATRIX_I_V._m12, PIXELART_CAMERA_MATRIX_I_V._m22);
 }
 
 half4 SpecularFragment(Varyings input) : SV_Target
@@ -130,6 +133,60 @@ half4 SpecularFragment(Varyings input) : SV_Target
     return float4(outputColor, 1.0);
 }
 
+half3 GlobalIlluminationShading(BRDFData brdfData, half3 bakedGI, half occlusion, half3 normalWS, half3 viewDirectionWS, float levelBias)
+{
+    const BRDFData noClearCoat = (BRDFData)0;
+    
+    half3 reflectVector = reflect(-viewDirectionWS, normalWS);
+    half NoV = multiStep(saturate(dot(normalWS, viewDirectionWS)), 2.0, 0.0, levelBias);
+    half fresnelTerm = Pow4(1.0 - NoV);
+
+    half3 indirectDiffuse = bakedGI;
+    half3 indirectSpecular = GlossyEnvironmentReflection(reflectVector, brdfData.perceptualRoughness, 1.0h);
+
+    half3 color = EnvironmentBRDF(brdfData, indirectDiffuse, indirectSpecular, fresnelTerm);
+    return color * occlusion;
+}
+
+half4 GlobalIlluminationFragment(Varyings input) : SV_Target
+{
+    GET_BLIT_UV
+    GET_POSITION
+    GET_ALBEDO
+    GET_CONNECTIVITY
+    GET_PROP
+    GET_NORMAL
+    GET_LIGHTMAP_UV
+
+    float smoothness = physicalProp.r;
+    float expSmoothness = exp2(10.0 * smoothness + 1.0);
+    float metallic = physicalProp.g;
+    float3 specular = lerp(float3(1.0, 1.0, 1.0), albedo, metallic);
+    float3 viewDir = GetViewDir();
+
+    float oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
+    float reflectivity = 1.0 - oneMinusReflectivity;
+    BRDFData brdfData = (BRDFData)0;
+    brdfData.albedo = albedo;
+    brdfData.diffuse = albedo * oneMinusReflectivity;
+    brdfData.specular = float3(0.0, 0.0, 0.0);
+    brdfData.reflectivity = reflectivity;
+
+    brdfData.perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(smoothness);
+    brdfData.roughness           = max(PerceptualRoughnessToRoughness(brdfData.perceptualRoughness), HALF_MIN_SQRT);
+    brdfData.roughness2          = max(brdfData.roughness * brdfData.roughness, HALF_MIN);
+    brdfData.grazingTerm         = clamp(smoothness + reflectivity, 0.0, 1.0);
+    brdfData.normalizationTerm   = brdfData.roughness * 4.0h + 2.0h;
+    brdfData.roughness2MinusOne  = brdfData.roughness2 - 1.0h;
+
+    float3 SH;
+    OUTPUT_SH(normalWS, SH);
+    float3 bakedGI = SAMPLE_GI(lightmapUV, SH, normalWS);
+    float3 outputColor = GlobalIlluminationShading(brdfData, bakedGI, 1.0, normalWS, viewDir, connectInfo.g < _ConnectivityAntialiasingThreshold ? 1.0 : 0.0);
+    
+    return float4(outputColor, 1.0);
+}
+
 half4 CombineFragment(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
@@ -137,6 +194,7 @@ half4 CombineFragment(Varyings input) : SV_Target
 
     float4 diffuse = tex2D(_DiffuseBuffer, uv);
     float4 specular = tex2D(_SpecularBuffer, uv);
+    float4 globalIllumination = tex2D(_GlobalIlluminationBuffer, uv);
 
-    return float4(diffuse.rgb + specular.rgb, 1.0);
+    return float4(diffuse.rgb + specular.rgb + globalIllumination.rgb, 1.0);
 }
