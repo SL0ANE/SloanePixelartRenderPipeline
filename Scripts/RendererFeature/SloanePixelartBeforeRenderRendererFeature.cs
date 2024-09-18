@@ -35,17 +35,21 @@ namespace Sloane
             var cmd = CommandBufferPool.Get();
             float unitSize = pixelartCamera.UnitSize;
 
+            Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
+            viewMatrix.m03 = Mathf.Round(viewMatrix.m03 / unitSize) * unitSize;
+            viewMatrix.m13 = Mathf.Round(viewMatrix.m13 / unitSize) * unitSize;
+            var proj = renderingData.cameraData.GetProjectionMatrix();
+            var viewProjMat = proj * viewMatrix;
+
+            SloanePixelartObject.UnitSize = unitSize;
+            SloanePixelartObject.ViewMatrix = viewMatrix;
+
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 // Align the camera to the unit size so the shape won't dither when the camera moves.
 
-                Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
-                viewMatrix.m03 = Mathf.Round(viewMatrix.m03 / unitSize) * unitSize;
-                viewMatrix.m13 = Mathf.Round(viewMatrix.m13 / unitSize) * unitSize;
-                var proj = renderingData.cameraData.GetProjectionMatrix();
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.CameraViewMatrix, viewMatrix);
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.CameraInvViewMatrix, viewMatrix.inverse);
-                var viewProjMat = proj * viewMatrix;
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.CameraViewProjectionMatrix, viewProjMat);
                 cmd.SetGlobalMatrix(ShaderPropertyStorage.CameraInvViewProjectionMatrix, viewProjMat.inverse);
 

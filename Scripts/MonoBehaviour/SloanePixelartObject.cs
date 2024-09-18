@@ -14,38 +14,86 @@ namespace Sloane
     [ExecuteAlways, RequireComponent(typeof(Renderer))]
     public class SloanePixelartObject : MonoBehaviour
     {
-        private struct TransformCache
+        Matrix4x4 m_ObjectMatrix = Matrix4x4.identity;
+        Matrix4x4 m_ObjectOffset = Matrix4x4.identity;
+        MaterialPropertyBlock m_ObjectMatrixPropertyBlock;
+        Renderer m_Renderer;
+
+        private static float m_UnitSize;
+        public static float UnitSize
         {
-            public Vector3 Position;
-            public Quaternion Rotation;
+            get
+            {
+                return m_UnitSize;
+            }
+            set
+            {
+                m_UnitSize = value;
+            }
         }
 
-        TransformCache transformCache;
-        bool PerformedSnap;
+        private static Matrix4x4 m_ViewMatrix;
+        public static Matrix4x4 ViewMatrix
+        {
+            get
+            {
+                return m_ViewMatrix;
+            }
+            set
+            {
+                m_ViewMatrix = value;
+            }
+        }
+
+        void OnEnable()
+        {
+            m_Renderer = GetComponent<Renderer>();
+            if (m_ObjectMatrixPropertyBlock == null) m_ObjectMatrixPropertyBlock = new MaterialPropertyBlock();
+            UpdateObjectMatrix();
+        }
+
         void OnWillRenderObject()
         {
-            if(SloanePixelartCastCamera.Current != null)
+            if (transform.hasChanged)
             {
-                PerformedSnap = true;
-                transformCache = new TransformCache
-                {
-                    Position = transform.position,
-                    Rotation = transform.rotation
-                };
-
-                transform.position = Vector3.zero;
-                transform.rotation = Quaternion.identity;
+                UpdateObjectMatrix();
+                transform.hasChanged = false;
             }
+
+            ApplyObjectMatrix();
         }
 
-        void OnRenderObject()
+        void ApplyObjectMatrix()
         {
-            if(PerformedSnap)
+            m_ObjectMatrixPropertyBlock.SetMatrix(ShaderPropertyStorage.SnapOffset, m_ObjectOffset);
+            m_Renderer.SetPropertyBlock(m_ObjectMatrixPropertyBlock);
+        }
+
+        void UpdateObjectMatrix()
+        {
+            m_ObjectMatrix = GetSnappedMatrix(transform);
+
+            m_ObjectOffset = m_ObjectMatrix * transform.localToWorldMatrix.inverse;
+            Debug.Log("UpdateObjectMatrix");
+        }
+
+        Matrix4x4 GetSnappedMatrix(Transform curTrans)
+        {
+            Matrix4x4 curMatrix = Matrix4x4.identity;
+            if(curTrans.parent != null)
             {
-                PerformedSnap = false;
-                transform.position = transformCache.Position;
-                transform.rotation = transformCache.Rotation;
+                curMatrix = GetSnappedMatrix(curTrans.parent);
             }
+            curMatrix = curMatrix * Matrix4x4.TRS(curTrans.localPosition, curTrans.localRotation, curTrans.localScale);
+            Matrix4x4 viewSpaceMatrix = m_ViewMatrix * curMatrix;
+            Vector4 viewPos = viewSpaceMatrix.GetColumn(3);
+            viewPos.x = Mathf.Round(viewPos.x / m_UnitSize) * m_UnitSize;
+            viewPos.y = Mathf.Round(viewPos.y / m_UnitSize) * m_UnitSize;
+
+            viewSpaceMatrix.SetColumn(3, viewPos);
+            curMatrix = m_ViewMatrix.inverse * viewSpaceMatrix;
+
+            return curMatrix;
         }
     }
 }

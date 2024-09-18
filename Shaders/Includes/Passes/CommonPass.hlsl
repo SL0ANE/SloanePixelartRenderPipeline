@@ -8,8 +8,13 @@ Varyings PixelartBaseVert(Attributes input)
 
     UNITY_SETUP_INSTANCE_ID(input);
 
+    float4x4 modelMatrix = GetObjectToWorldMatrix();
+    float4x4 snapOffset = UNITY_ACCESS_INSTANCED_PROP(Props, _SnapOffset);
+    bool hasSnapOffset = snapOffset._m33 == 1.0;
+    if(hasSnapOffset) modelMatrix = mul(snapOffset, modelMatrix);
+
 #ifdef ALIGN_TO_PIXEL
-    float3 originWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
+    float3 originWS = mul(modelMatrix, float4(0.0, 0.0, 0.0, 1.0)).xyz;
     float3 originVS = mul(PIXELART_CAMERA_MATRIX_V, float4(originWS, 1.0));
 #ifdef UNIT_SCALE
     float unitSize = _UnitSize / _LocalUnitScale;
@@ -19,7 +24,7 @@ Varyings PixelartBaseVert(Attributes input)
 #endif
 #endif
 
-    output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+    output.positionWS = mul(modelMatrix, float4(input.positionOS.xyz, 1.0)).xyz;
 
 #ifdef ALIGN_TO_PIXEL
     output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0)) + originVSOffset;

@@ -10,6 +10,10 @@ CBUFFER_START(UnityPerMaterial)
     int _MainLightLevel;
 CBUFFER_END
 
+UNITY_INSTANCING_BUFFER_START(Props)
+    UNITY_DEFINE_INSTANCED_PROP(float4x4, _SnapOffset)
+UNITY_INSTANCING_BUFFER_END(Props)
+
 float3 _LightDirection;
 
 #include "CommonPass.hlsl"

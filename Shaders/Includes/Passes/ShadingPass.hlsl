@@ -5,7 +5,8 @@
 
 #include "../Inputs/CameraParams.hlsl"
 #include "../Inputs/BuffersResolver.hlsl"
-#include "../Math.hlsl"
+#include "../Math/Step.hlsl"
+#include "../Math/FibonacciSphere.hlsl"
 #include "../Blit.hlsl"
 #include "../Transform.hlsl"
 
@@ -56,9 +57,12 @@ half4 DiffuseFragment(Varyings input) : SV_Target
     GET_CONNECTIVITY
     GET_PROP
     GET_NORMAL
+
+    // normalWS = FibonacciSphereMap(normalWS, 128);
     
     float3 outputColor = float3(0.0, 0.0, 0.0);
-    
+    float metallic = physicalProp.g;
+
     float mainLightLevel = paletteProp.r * 255.0;
 
     VertexPositionInputs vertexInput = (VertexPositionInputs)0;
@@ -76,6 +80,7 @@ half4 DiffuseFragment(Varyings input) : SV_Target
     LIGHT_LOOP_END
 
     outputColor *= albedo.rgb;
+    outputColor = outputColor * (1.0 - metallic);
 
     return float4(outputColor, 1.0);
 }
@@ -157,6 +162,8 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
     GET_PROP
     GET_NORMAL
     GET_LIGHTMAP_UV
+
+    // normalWS = FibonacciSphereMap(normalWS, 128);
 
     float smoothness = physicalProp.r;
     float expSmoothness = exp2(10.0 * smoothness + 1.0);

@@ -18,8 +18,7 @@ Shader "Hidden/Sloane/Pixelart/Blit/ColorCorrection"
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-
-            #include "../Includes/Math.hlsl"
+            
             #include "../Includes/Blit.hlsl"
 
             sampler2D _MainTex;

@@ -43,8 +43,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   m_OutlintShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
-  m_SolidColor: 0
-  m_OutlineColor: {r: 0.2830189, g: 0.24697402, b: 0.24697402, a: 1}
+  m_SolidColor: 1
+  m_OutlineColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 0
-  m_TargerBuffer: 11
+  m_TargerBuffer: 10
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Name: SloanePixelartConnectivityMapGenerationRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_Threshold: 0.36
+  m_Threshold: 0.5
   m_IterationScale: 1.5
   m_ConnectivityCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
     type: 3}

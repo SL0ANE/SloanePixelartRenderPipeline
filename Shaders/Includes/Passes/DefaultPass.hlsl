@@ -11,6 +11,10 @@ CBUFFER_START(UnityPerMaterial)
     int _MainLightLevel;
 CBUFFER_END
 
+UNITY_INSTANCING_BUFFER_START(Props)
+    UNITY_DEFINE_INSTANCED_PROP(float4x4, _SnapOffset)
+UNITY_INSTANCING_BUFFER_END(Props)
+
 #include "CommonPass.hlsl"
 
 void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal: BUFFER_NORMAL, out float4 outPhysical: BUFFER_PHYSICAL, out float4 outShape: BUFFER_SHAPE, out float4 outPalette: BUFFER_PALETTE, out float4 outLightmapUV: BUFFER_LIGHTMAP_UV)

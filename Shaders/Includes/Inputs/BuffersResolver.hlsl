@@ -42,4 +42,5 @@ float3 blendNormalWS = normalWS; \
 if(connectedToRight > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(_ScreenParams.z - 1.0, 0.0)).xyz; \
 if(connectedToLeft > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(_ScreenParams.z - 1.0, 0.0)).xyz; \
 if(connectedToUp > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(0.0, _ScreenParams.w - 1.0)).xyz; \
-if(connectedToDown > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(0.0, _ScreenParams.w - 1.0)).xyz;
+if(connectedToDown > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(0.0, _ScreenParams.w - 1.0)).xyz; \
+normalWS = normalize(lerp(normalWS, normalize(blendNormalWS), shapeProp.r));
