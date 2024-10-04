@@ -175,6 +175,7 @@ namespace Sloane
                 graphicsFormat = GraphicsFormat.R16G16B16A16_SNorm,
                 volumeDepth = 1,
                 msaaSamples = 1,
+                sRGB = true,
                 dimension = TextureDimension.Tex2D
             };
 
@@ -251,7 +252,7 @@ namespace Sloane
                 depthBufferBits = 24,
                 enableRandomWrite = true,
                 graphicsFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.HDR),
-                sRGB = true,
+                sRGB = false,
                 volumeDepth = 1,
                 msaaSamples = 1,
                 dimension = TextureDimension.Tex2D

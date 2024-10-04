@@ -41,10 +41,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e9acdda3adb5c42bf59c4cd350dc30, type: 3}
   m_Name: SloanePixelartOutlineRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   m_OutlintShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
   m_SolidColor: 1
-  m_OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+  m_OutlineColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,8 +73,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f181f9341a5607547a683d366de56523, type: 3}
   m_Name: Debug
   m_EditorClassIdentifier: 
-  m_Active: 1
-  m_TargerBuffer: 9
+  m_Active: 0
+  m_TargerBuffer: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

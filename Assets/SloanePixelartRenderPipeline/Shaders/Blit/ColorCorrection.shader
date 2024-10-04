@@ -33,9 +33,10 @@ Shader "Hidden/Sloane/Pixelart/Blit/ColorCorrection"
                 float res = float(_Resolution);
 
                 float3 outputColor = tex2D(_MainTex, uv).rgb;
+                outputColor = LinearToSRGB(outputColor);
                 outputColor = clamp(outputColor, 0.001, 0.999);
 
-                float2 targetCoord = float2(((floor(outputColor.r * res) + 0.5) / res + floor(outputColor.b * res)) / res, 1.0 - (floor(outputColor.g * res) + 0.5) / res);
+                float2 targetCoord = float2(outputColor.r / res + floor(outputColor.b * res) / res, 1.0 - outputColor.g);
                 outputColor = _Palette.Sample(sampler_Palette_point_clamp_sampler, targetCoord).rgb;
 
                 return float4(outputColor, 1.0);

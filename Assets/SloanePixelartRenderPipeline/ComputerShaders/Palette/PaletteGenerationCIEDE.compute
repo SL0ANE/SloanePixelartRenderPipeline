@@ -123,6 +123,14 @@ float CalculateColorDiff(float3 color0, float3 color1)
     return calculate_CIEDE2000(lab1, lab2);
 }
 
+float3 linear2srgb(float3 c) {
+    float3 srgb;
+    srgb.x = (c.x <= 0.0031308) ? (12.9232102 * c.x) : (1.055 * pow(c.x, 1.0 / 2.4) - 0.055);
+    srgb.y = (c.y <= 0.0031308) ? (12.9232102 * c.y) : (1.055 * pow(c.y, 1.0 / 2.4) - 0.055);
+    srgb.z = (c.z <= 0.0031308) ? (12.9232102 * c.z) : (1.055 * pow(c.z, 1.0 / 2.4) - 0.055);
+    return srgb;
+}
+
 [numthreads(8,8,8)]
 void Main (uint3 id : SV_DispatchThreadID)
 {
@@ -130,8 +138,9 @@ void Main (uint3 id : SV_DispatchThreadID)
 
     uint2 outputCoord = uint2(id.z * _Resolution + id.x, _Resolution - id.y - 1);
     float3 inputColor = float3((float(id.x) + 0.5) / _Resolution, (float(id.y) + 0.5) / _Resolution, (float(id.z) + 0.5) / _Resolution);
+    // inputColor = linear2srgb(inputColor);
 
-    float minDiff = 65535.0f;
+    float minDiff = 65535;
     uint minDiffIndex = 0;
 
     for(uint i = 0; i < _Count; i++)

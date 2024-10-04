@@ -200,6 +200,7 @@ half4 CombineFragment(Varyings input) : SV_Target
     float2 uv = input.texcoord;
 
     float4 diffuse = tex2D(_DiffuseBuffer, uv);
+    clip(diffuse.a - 1);
     float4 specular = tex2D(_SpecularBuffer, uv);
     float4 globalIllumination = tex2D(_GlobalIlluminationBuffer, uv);
 

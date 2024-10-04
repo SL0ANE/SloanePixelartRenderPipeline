@@ -6,7 +6,8 @@ float4 positionCS = mul(PIXELART_CAMERA_MATRIX_VP, float4(positionWS, 1.0));
 
 
 #define GET_ALBEDO \
-float4 albedo = tex2D(_AlbedoBuffer, uv);
+float4 albedo = tex2D(_AlbedoBuffer, uv); \
+clip(albedo.a - 0.0001);
 
 
 #define GET_CONNECTIVITY \

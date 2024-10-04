@@ -100,6 +100,17 @@ namespace Sloane
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
+                var diffuseBuffer = pixelartCamera.GetBuffer(TargetBuffer.Diffuse);
+                var specularBuffer = pixelartCamera.GetBuffer(TargetBuffer.Specular);
+                var globalIlluminationBuffer = pixelartCamera.GetBuffer(TargetBuffer.GlobalIllumination);
+
+                cmd.SetRenderTarget(diffuseBuffer);
+                cmd.ClearRenderTarget(true, true, Color.clear, 1);
+                cmd.SetRenderTarget(specularBuffer);
+                cmd.ClearRenderTarget(true, true, Color.clear, 1);
+                cmd.SetRenderTarget(globalIlluminationBuffer);
+                cmd.ClearRenderTarget(true, true, Color.clear, 1);
+                
                 cmd.SetGlobalVector(ShaderPropertyStorage.ScreenParams, new Vector4(pixelartCamera.TargetWidth, pixelartCamera.TargetHeight, 1.0f + 1.0f / pixelartCamera.TargetWidth, 1.0f + 1.0f / pixelartCamera.TargetHeight));
                 cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, m_AAScaler / 2.0f);
                 cmd.SetGlobalInt(ShaderPropertyStorage.AdditionalLightCount, renderingData.lightData.additionalLightsCount);
