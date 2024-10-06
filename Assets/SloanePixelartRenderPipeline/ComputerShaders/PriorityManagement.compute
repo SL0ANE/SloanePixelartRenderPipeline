@@ -1,0 +1,45 @@
+#pragma kernel Main
+
+Texture2D<float4> _ShapePropertyBuffer;
+Texture2D<float4> _AlbedoBuffer;
+RWTexture2D<float4> _UVBuffer;
+uint _SamplingScale;
+uint _Width;
+uint _Height;
+float _CenterDistanceAttenuation;
+
+[numthreads(8,8,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > _Width || id.y > _Height) return;
+
+    uint2 sourceCoordStart = id.xy * _SamplingScale;
+    uint2 sourceCoordCenter = sourceCoordStart + uint2(1, 1) * _SamplingScale / 2;
+    float curPriority = 0;
+    int2 targetCoordOffset = 0;
+    int curCenterDis = 65535;
+    if(_AlbedoBuffer[sourceCoordCenter].a == 0.0) return;
+
+    for(int i = 0; i < _SamplingScale; i++)
+    {
+        for(int j = 0; j < _SamplingScale; j++)
+        {
+            uint2 sourceCoord = sourceCoordStart + uint2(i, j);
+            float4 targetColor = _ShapePropertyBuffer[sourceCoord];
+            int2 centerDis = float2(sourceCoord) - float2(sourceCoordCenter);
+            int centerMaxDis = max(abs(centerDis.x), abs(centerDis.y));
+            float priority = (targetColor.r + 0.00001) * pow((1.0 - float(centerMaxDis) / float(_SamplingScale / 2)), _CenterDistanceAttenuation);
+
+            if(priority > curPriority)
+            {
+                targetCoordOffset = int2(i, j);
+                curPriority = priority;
+                curCenterDis = centerMaxDis;
+            }
+        }
+    }
+
+    float4 targetColor = float4((float2(targetCoordOffset) + float2(0.5, 0.5)) / float(_SamplingScale), 0, 0);
+
+    _UVBuffer[id.xy] = targetColor;
+}

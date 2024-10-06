@@ -13,6 +13,7 @@
 uint _AdditionalLightCount;
 float _ConnectivityAntialiasingThreshold;
 
+sampler2D _UVBuffer;
 sampler2D _AlbedoBuffer;
 sampler2D _NormalBuffer;
 sampler2D _DepthBuffer;
@@ -26,6 +27,8 @@ sampler2D _ConnectivityResultBuffer;
 sampler2D _DiffuseBuffer;
 sampler2D _SpecularBuffer;
 sampler2D _GlobalIlluminationBuffer;
+
+float _SamplingScale;
 
 float3 DiffuseShading(Light light, float3 normal, float connect, float level, float transmission)
 {
@@ -53,6 +56,7 @@ half4 DiffuseFragment(Varyings input) : SV_Target
 {
     GET_BLIT_UV
     GET_POSITION
+    GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
     GET_PROP
@@ -105,6 +109,7 @@ half4 SpecularFragment(Varyings input) : SV_Target
 {
     GET_BLIT_UV
     GET_POSITION
+    GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
     GET_PROP
@@ -157,6 +162,7 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
 {
     GET_BLIT_UV
     GET_POSITION
+    GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
     GET_PROP

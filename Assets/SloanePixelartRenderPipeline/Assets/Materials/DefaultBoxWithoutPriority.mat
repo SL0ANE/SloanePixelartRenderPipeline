@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DefaultBox
+  m_Name: DefaultBoxWithoutPriority
   m_Shader: {fileID: 4800000, guid: 159f54a0e05f18e4d9ec14fea1bca0a7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -64,7 +64,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PriorityMap:
-        m_Texture: {fileID: 2800000, guid: 56838f1c35b7b7e4fa41fbd07ff88d40, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:

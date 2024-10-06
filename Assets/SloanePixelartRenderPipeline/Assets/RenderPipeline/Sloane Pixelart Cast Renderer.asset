@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 0
-  m_TargerBuffer: 1
+  m_TargerBuffer: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,12 +94,13 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -8551405505987417784}
   - {fileID: -3698282000451687298}
+  - {fileID: 7011952267336840844}
   - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
   - {fileID: -3125560631150118436}
   - {fileID: -5677023497241473791}
   - {fileID: 5439611315726938619}
-  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcceb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4014d6019352937b1fb7119deab617d4b
+  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcc8c769bac6f754f61eb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4014d6019352937b1fb7119deab617d4b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -179,3 +180,19 @@ MonoBehaviour:
   m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,
     type: 3}
   m_Palette: {fileID: 2800000, guid: b4396614aa72e034f82d9309bf86e80d, type: 3}
+--- !u!114 &7011952267336840844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61b38a1440753b848bbd25ceace20bda, type: 3}
+  m_Name: SloanePixelartPriorityManagementRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_PriorityManagementShader: {fileID: 7200000, guid: cd0e421e3080db34287a830c3ade7b6b,
+    type: 3}
+  m_CenterDistanceAttenuation: 0.6

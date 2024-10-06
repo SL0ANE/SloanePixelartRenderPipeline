@@ -55,6 +55,9 @@ namespace Sloane
 
                 cmd.SetProjectionMatrix(proj);
                 cmd.SetGlobalFloat(ShaderPropertyStorage.UnitSize, unitSize);
+
+                cmd.SetRenderTarget(pixelartCamera.GetBuffer(TargetBuffer.UV));
+                cmd.ClearRenderTarget(true, true, Color.gray);
             }
 
             context.ExecuteCommandBuffer(cmd);

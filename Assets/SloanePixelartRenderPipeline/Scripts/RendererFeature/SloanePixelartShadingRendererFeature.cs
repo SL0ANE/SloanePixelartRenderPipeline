@@ -103,7 +103,7 @@ namespace Sloane
                 var diffuseBuffer = pixelartCamera.GetBuffer(TargetBuffer.Diffuse);
                 var specularBuffer = pixelartCamera.GetBuffer(TargetBuffer.Specular);
                 var globalIlluminationBuffer = pixelartCamera.GetBuffer(TargetBuffer.GlobalIllumination);
-
+                
                 cmd.SetRenderTarget(diffuseBuffer);
                 cmd.ClearRenderTarget(true, true, Color.clear, 1);
                 cmd.SetRenderTarget(specularBuffer);
@@ -114,10 +114,10 @@ namespace Sloane
                 cmd.SetGlobalVector(ShaderPropertyStorage.ScreenParams, new Vector4(pixelartCamera.TargetWidth, pixelartCamera.TargetHeight, 1.0f + 1.0f / pixelartCamera.TargetWidth, 1.0f + 1.0f / pixelartCamera.TargetHeight));
                 cmd.SetGlobalFloat(ShaderPropertyStorage.ConnectivityAntialiasingThreshold, m_AAScaler / 2.0f);
                 cmd.SetGlobalInt(ShaderPropertyStorage.AdditionalLightCount, renderingData.lightData.additionalLightsCount);
-
-                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), pixelartCamera.GetBuffer(TargetBuffer.Diffuse));
-                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Specular), pixelartCamera.GetBuffer(TargetBuffer.Specular));
-                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.GlobalIllumination), pixelartCamera.GetBuffer(TargetBuffer.GlobalIllumination));
+                
+                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), diffuseBuffer);
+                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Specular), specularBuffer);
+                cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.GlobalIllumination), globalIlluminationBuffer);
             }
 
             context.ExecuteCommandBuffer(cmd);

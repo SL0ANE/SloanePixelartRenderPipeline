@@ -4,6 +4,10 @@ float sceneRawDepth = tex2D(_DepthBuffer, uv).r; \
 float3 positionWS = GetWorldPositionWithDepth(uv, sceneRawDepth); \
 float4 positionCS = mul(PIXELART_CAMERA_MATRIX_VP, float4(positionWS, 1.0));
 
+#define GET_UV_WITH_PRIORITY \
+float4 uvInfo = tex2D(_UVBuffer, uv); \
+uv = uv + (uvInfo.xy - float2(0.5, 0.5)) * float2(_ScreenParams.z - 1.0, _ScreenParams.w - 1.0); \
+
 
 #define GET_ALBEDO \
 float4 albedo = tex2D(_AlbedoBuffer, uv); \
@@ -44,4 +48,4 @@ if(connectedToRight > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(_Scre
 if(connectedToLeft > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(_ScreenParams.z - 1.0, 0.0)).xyz; \
 if(connectedToUp > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(0.0, _ScreenParams.w - 1.0)).xyz; \
 if(connectedToDown > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(0.0, _ScreenParams.w - 1.0)).xyz; \
-normalWS = normalize(lerp(normalWS, normalize(blendNormalWS), shapeProp.r));
+normalWS = normalize(lerp(normalWS, normalize(blendNormalWS), shapeProp.g));

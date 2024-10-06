@@ -17,7 +17,7 @@ namespace Sloane
     public class ComputeShaderPass : ScriptableRenderPass
     {
 
-        static ProfilingSampler m_ProfilingSampler;
+        ProfilingSampler m_ProfilingSampler;
         ComputeShader m_ComputeShader;
         int m_ComputeShaderKernelIndex;
         ShaderInputBuffer m_TargetBuffer;

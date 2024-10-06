@@ -30,5 +30,7 @@ namespace Sloane
         public static readonly int ConnectivityMap = Shader.PropertyToID("_ConnectivityMap");
         public static readonly int PrevConnectivityMap = Shader.PropertyToID("_PrevConnectivityMap");
         public static readonly int SnapOffset = Shader.PropertyToID("_SnapOffset");
+
+        public static readonly int CenterDistanceAttenuation = Shader.PropertyToID("_CenterDistanceAttenuation");
     }
 }

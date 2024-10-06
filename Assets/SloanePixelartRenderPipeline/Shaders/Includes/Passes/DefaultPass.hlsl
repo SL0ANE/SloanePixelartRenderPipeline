@@ -12,6 +12,10 @@ CBUFFER_START(UnityPerMaterial)
 
     sampler2D _BaseMap;
     float4 _BaseMap_ST;
+
+    float _Priority;
+    sampler2D _PriorityMap;
+    float4 _PriorityMap_ST;
 CBUFFER_END
 
 UNITY_INSTANCING_BUFFER_START(Props)
@@ -36,7 +40,8 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
 
     palettePropOutput.r = float(_MainLightLevel) / 255.0;
 
-    shapePropOutput.r = _NormalBlendScale;
+    shapePropOutput.r = _Priority * tex2D(_PriorityMap, input.uv * _PriorityMap_ST.xy + _PriorityMap_ST.zw).r;
+    shapePropOutput.g = _NormalBlendScale;
 
     outPhysical = physicalPropOutput;
     outShape = shapePropOutput;
