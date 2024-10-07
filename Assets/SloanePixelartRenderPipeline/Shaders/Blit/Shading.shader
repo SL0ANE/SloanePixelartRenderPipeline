@@ -59,6 +59,22 @@ Shader "Hidden/Sloane/Pixelart/Blit/Shading"
 
         Pass
         {
+            Name "RimLight"
+
+            ZTest Always
+            ZWrite Off
+            Cull Off
+
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment RimLightFragment
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _SHADOWS_SOFT
+
+            ENDHLSL
+        }
+
+        Pass
+        {
             Name "ShadingCombination"
 
             ZTest Always

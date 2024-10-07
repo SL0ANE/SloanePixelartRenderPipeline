@@ -27,8 +27,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_ShadingShader: {fileID: 4800000, guid: 1378182e6e91cbd41b4031459b5f7afa, type: 3}
+  m_RimLightComputeShader: {fileID: 7200000, guid: 541451e952a5bfc46a692b36d83dd5c4,
+    type: 3}
   m_EnableAA: 1
-  m_AAScaler: 1.38
+  m_AAScaler: 1.5
 --- !u!114 &-5677023497241473791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43,8 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_OutlintShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
-  m_SolidColor: 1
-  m_OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+  m_SolidColor: 0
+  m_OutlineColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,7 +76,7 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 0
-  m_TargerBuffer: 0
+  m_TargerBuffer: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,10 +99,10 @@ MonoBehaviour:
   - {fileID: 7011952267336840844}
   - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
-  - {fileID: -3125560631150118436}
   - {fileID: -5677023497241473791}
+  - {fileID: -3125560631150118436}
   - {fileID: 5439611315726938619}
-  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcc8c769bac6f754f61eb8e7a91ec2b763c5b93c0e571fc3c96dcf959782ac79fd4014d6019352937b1fb7119deab617d4b
+  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcc8c769bac6f754f61eb8e7a91ec2b763c5b93c0e571fc3c96014d6019352937b1dcf959782ac79fd4fb7119deab617d4b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -156,7 +158,7 @@ MonoBehaviour:
   m_Name: SloanePixelartConnectivityMapGenerationRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_Threshold: 0.5
+  m_Threshold: 0.25
   m_IterationScale: 1.5
   m_ConnectivityCheckShader: {fileID: 7200000, guid: 9ab127fa6687739459f910135ddacfb3,
     type: 3}
@@ -179,7 +181,7 @@ MonoBehaviour:
   m_Active: 1
   m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,
     type: 3}
-  m_Palette: {fileID: 2800000, guid: b4396614aa72e034f82d9309bf86e80d, type: 3}
+  m_Palette: {fileID: 2800000, guid: b84a234509a1f6246abdb6113cb6a26f, type: 3}
 --- !u!114 &7011952267336840844
 MonoBehaviour:
   m_ObjectHideFlags: 0

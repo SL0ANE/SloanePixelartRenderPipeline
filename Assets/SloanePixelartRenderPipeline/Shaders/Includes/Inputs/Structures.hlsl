@@ -17,9 +17,10 @@ struct Varyings
     float2 uv : TEXCOORD2;
     float3 positionWS : TEXCOORD3;
     float3 positionVS : TEXCOORD4;
+    float4 positionSS : TEXCOORD5;
 
-    float2 staticLightmapUV   : TEXCOORD5;
-    float2 dynamicLightmapUV  : TEXCOORD6;
+    float2 staticLightmapUV   : TEXCOORD6;
+    float2 dynamicLightmapUV  : TEXCOORD7;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO

@@ -1,0 +1,41 @@
+int _Width;
+int _Height;
+
+#pragma kernel Main
+RWTexture2D<float4> _RimLightBuffer;
+
+[numthreads(8,8,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > uint(_Width) || id.y > uint(_Height)) return;
+    int2 coord = int2(id.xy);
+
+    float4 currentColor = _RimLightBuffer[coord];
+
+    int hasNonBlackNeighbor = 0;
+    for (int y = -1; y <= 1; y++)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            if (x == 0 && y == 0) continue;
+
+            int2 neighborCoord = coord + int2(x, y);
+            if (neighborCoord.x >= 0 && neighborCoord.x < _Width && neighborCoord.y >= 0 && neighborCoord.y < _Height)
+            {
+                float4 neighborColor = _RimLightBuffer[neighborCoord];
+                if (neighborColor.r > 0.0 || neighborColor.g > 0.0 || neighborColor.b > 0.0)
+                {
+                    hasNonBlackNeighbor = 1;
+                    break;
+                }
+            }
+        }
+
+        if (hasNonBlackNeighbor == 1) break;
+    }
+
+    if (!hasNonBlackNeighbor)
+    {
+        _RimLightBuffer[coord] = float4(0.0, 0.0, 0.0, currentColor.a);
+    }
+}

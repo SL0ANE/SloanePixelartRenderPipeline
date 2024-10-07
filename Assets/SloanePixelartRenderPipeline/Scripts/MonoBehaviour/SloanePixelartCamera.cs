@@ -20,7 +20,7 @@ namespace Sloane
 
         [SerializeField]
         Vector2Int m_TargetResolution = new Vector2Int(320, 180);
-        [SerializeField]
+        [SerializeField,Range(1, 9)]
         int m_DownSamplingScale = 5;
         [SerializeField, HideInInspector]
         SloanePixelartCastCamera m_CastCamera;

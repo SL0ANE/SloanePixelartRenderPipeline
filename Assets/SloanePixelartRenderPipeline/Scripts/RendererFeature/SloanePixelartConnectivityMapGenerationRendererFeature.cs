@@ -67,8 +67,7 @@ namespace Sloane
 
             m_ResultingPass.ClearSourceBuffers();
             m_ResultingPass.AddSourceBuffer(ShaderPropertyStorage.ConnectivityMap, connectivityMap);
-            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Depth), depthBuffer);
-            m_GenerationPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), normalBuffer);
+            m_ResultingPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Normal), normalBuffer);
             m_ResultingPass.SetTargetBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.ConnectivityResult), pixelartCamera.GetBuffer(TargetBuffer.ConnectivityResult));
             renderer.EnqueuePass(m_ResultingPass);
         }

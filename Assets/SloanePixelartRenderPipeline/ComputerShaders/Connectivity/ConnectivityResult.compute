@@ -31,6 +31,7 @@ void Main (uint3 id : SV_DispatchThreadID)
     centerDepth = 1.0 - centerDepth;
     #endif
     centerDepth = LINEAR_DEPTH(centerDepth);
+    float normalDiff = 0.0;
 
     for(int i = -halfScale; i <= halfScale; i++)
     {
@@ -57,6 +58,9 @@ void Main (uint3 id : SV_DispatchThreadID)
 
             if(targetConnectedToCenter > 0) totalConnectedCount += 1.0;
             if(targetConnectedToCenter > 0 || currentDepth < centerDepth) totalConnectedOrCloserCount += 1.0;
+
+            float diff = CheckNormalContinuous(coord, BUFFER_WIDTH, BUFFER_HEIGHT);
+            if(diff > normalDiff) normalDiff = diff;
         }
     }
 
@@ -77,6 +81,7 @@ void Main (uint3 id : SV_DispatchThreadID)
     CheckConnectedDepthNormal(center, center - int2(0, _SamplingScale), connectedDown, closerDown, _SamplingScale);
     
     float4 output = float4(totalConnectedCount / float(_SamplingScale * _SamplingScale), totalConnectedOrCloserCount / float(_SamplingScale * _SamplingScale), 0.0, 0.0);
+    output.b = normalDiff;
     output.a = PackFloatInt8bit(0.0, (connectedRight << 7) + (connectedLeft << 6) + (connectedUp << 5) + (connectedDown << 4) + (closerRight << 3) + (closerLeft << 2) + (closerUp << 1) + (closerDown << 0), 256.0);
     _ConnectivityResultBuffer[id.xy] = output;
 }

@@ -32,5 +32,8 @@ namespace Sloane
         public static readonly int SnapOffset = Shader.PropertyToID("_SnapOffset");
 
         public static readonly int CenterDistanceAttenuation = Shader.PropertyToID("_CenterDistanceAttenuation");
+
+        public static readonly int RimLights = Shader.PropertyToID("_RimLights");
+        public static readonly int RimLightsCount = Shader.PropertyToID("_RimLightsCount");
     }
 }

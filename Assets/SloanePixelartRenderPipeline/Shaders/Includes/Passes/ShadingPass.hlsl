@@ -9,6 +9,7 @@
 #include "../Math/FibonacciSphere.hlsl"
 #include "../Blit.hlsl"
 #include "../Transform.hlsl"
+#include "../RimLight.hlsl"
 
 uint _AdditionalLightCount;
 float _ConnectivityAntialiasingThreshold;
@@ -20,17 +21,19 @@ sampler2D _DepthBuffer;
 sampler2D _PhysicalPropertyBuffer;
 sampler2D _ShapePropertyBuffer;
 sampler2D _PalettePropertyBuffer;
+sampler2D _RimLightPropertyBuffer;
 sampler2D _LightmapUVBuffer;
 
 sampler2D _ConnectivityResultBuffer;
 
 sampler2D _DiffuseBuffer;
 sampler2D _SpecularBuffer;
+sampler2D _RimLightBuffer;
 sampler2D _GlobalIlluminationBuffer;
 
 float _SamplingScale;
 
-float3 DiffuseShading(Light light, float3 normal, float connect, float level, float transmission)
+float3 DiffuseShading(Light light, float3 normal, float connect, float normalDiff, float normalEdgeThreshold, float level, float offset, float transmission, int applyAA = 1)
 {
     float ndotl = dot(light.direction, normal);
     ndotl *= light.distanceAttenuation * light.shadowAttenuation;
@@ -39,11 +42,17 @@ float3 DiffuseShading(Light light, float3 normal, float connect, float level, fl
 
     if(level > 0.0)
     {
-        ndotl = pow(ndotl, 1.0 / 2.2);
-    
-        ndotl = multiStep(ndotl, level, 0.0, 0.0);
         float singleLevel = 1.0 / (level - 1.0);
-        if(ndotl > singleLevel && connect < _ConnectivityAntialiasingThreshold) ndotl -= singleLevel;
+
+        ndotl = pow(ndotl, 1.0 / 2.2);
+        ndotl += singleLevel * offset;
+        ndotl = saturate(ndotl);
+
+        ndotl = multiStep(ndotl, level, 0.0, 0.0);
+        if((ndotl > singleLevel && connect < _ConnectivityAntialiasingThreshold) && applyAA == 1) ndotl -= singleLevel;
+        if((normalDiff > normalEdgeThreshold)) ndotl -= singleLevel;
+
+        ndotl = saturate(ndotl);
 
         ndotl = lerp(transmission, 1.0, ndotl);
     }
@@ -74,13 +83,17 @@ half4 DiffuseFragment(Varyings input) : SV_Target
 				vertexInput.positionCS = positionCS;
 				float4 shadowCoord = GetShadowCoord(vertexInput);
 
+    float ditherOffset = paletteProp.g * 2.0 - 1.0;
+    int applyAA = 1;
+    float3 rimLightInfo = tex2D(_RimLightBuffer, uv).rgb;
+    if(rimLightInfo.r > 0.0 || rimLightInfo.g > 0.0 || rimLightInfo.g > 0.0) applyAA = 0;
+
     Light mainLight = GetMainLight(shadowCoord);
-    mainLight.distanceAttenuation = 1.0;
-    outputColor += DiffuseShading(mainLight, normalWS, connectInfo.g, mainLightLevel, 0.0);
+    outputColor += DiffuseShading(mainLight, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, mainLightLevel, ditherOffset, 0.0, applyAA);
 
     LIGHT_LOOP_BEGIN(_AdditionalLightCount)
         Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
-        outputColor += DiffuseShading(light, normalWS, connectInfo.g, 3.0, 0.0);
+        outputColor += DiffuseShading(light, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, 3.0, ditherOffset, 0.0, applyAA);
     LIGHT_LOOP_END
 
     outputColor *= albedo.rgb;
@@ -132,7 +145,6 @@ half4 SpecularFragment(Varyings input) : SV_Target
 				float4 shadowCoord = GetShadowCoord(vertexInput);
 
     Light mainLight = GetMainLight(shadowCoord);
-    mainLight.distanceAttenuation = 1.0;
     outputColor += SpecularShading(mainLight, normalWS, viewDir, specular, smoothness, expSmoothness, 2.0);
 
     LIGHT_LOOP_BEGIN(_AdditionalLightCount)
@@ -192,10 +204,14 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
     brdfData.normalizationTerm   = brdfData.roughness * 4.0h + 2.0h;
     brdfData.roughness2MinusOne  = brdfData.roughness2 - 1.0h;
 
+    int applyAA = 1;
+    float3 rimLightInfo = tex2D(_RimLightBuffer, uv).rgb;
+    if(rimLightInfo.r > 0.0 || rimLightInfo.g > 0.0 || rimLightInfo.g > 0.0) applyAA = 0;
+
     float3 SH;
     OUTPUT_SH(normalWS, SH);
     float3 bakedGI = SAMPLE_GI(lightmapUV, SH, normalWS);
-    float3 outputColor = GlobalIlluminationShading(brdfData, bakedGI, 1.0, normalWS, viewDir, connectInfo.g < _ConnectivityAntialiasingThreshold ? 1.0 : 0.0);
+    float3 outputColor = GlobalIlluminationShading(brdfData, bakedGI, 1.0, normalWS, viewDir, (connectInfo.g < _ConnectivityAntialiasingThreshold && applyAA == 1.0) ? 1.0 : 0.0);
     
     return float4(outputColor, 1.0);
 }
@@ -209,6 +225,44 @@ half4 CombineFragment(Varyings input) : SV_Target
     clip(diffuse.a - 1);
     float4 specular = tex2D(_SpecularBuffer, uv);
     float4 globalIllumination = tex2D(_GlobalIlluminationBuffer, uv);
+    float4 rimLight = tex2D(_RimLightBuffer, uv);
 
-    return float4(diffuse.rgb + specular.rgb + globalIllumination.rgb, 1.0);
+    return float4(diffuse.rgb + specular.rgb + globalIllumination.rgb + rimLight.rgb, 1.0);
+}
+
+half4 RimLightFragment(Varyings input) : SV_Target
+{
+    GET_BLIT_UV
+    GET_POSITION
+    GET_UV_WITH_PRIORITY
+    GET_ALBEDO
+    GET_CONNECTIVITY
+    GET_PROP
+    GET_NORMAL
+    
+    float3 outputColor = float3(0.0, 0.0, 0.0);
+    float mainLightLevel = paletteProp.r * 255.0;
+    float metallic = physicalProp.g;
+    float3 specular = lerp(float3(1.0, 1.0, 1.0), albedo, metallic);
+
+    VertexPositionInputs vertexInput = (VertexPositionInputs)0;
+				vertexInput.positionWS = positionWS;
+				vertexInput.positionCS = positionCS;
+				float4 shadowCoord = GetShadowCoord(vertexInput);
+
+    Light mainLight = GetMainLight(shadowCoord);
+    outputColor += rimLightProp.rgb * rimLightProp.a * RimLightShading(mainLight, normalWS, specular, 2.0, connectedToRight | !closerThanRight, connectedToLeft | !closerThanLeft, connectedToUp | !closerThanUp, connectedToDown | !closerThanDown);
+
+    LIGHT_LOOP_BEGIN(_AdditionalLightCount)
+        Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
+        outputColor += rimLightProp.rgb * rimLightProp.a * RimLightShading(light, normalWS, specular, 2.0, connectedToRight | !closerThanRight, connectedToLeft | !closerThanLeft, connectedToUp | !closerThanUp, connectedToDown | !closerThanDown);
+    LIGHT_LOOP_END
+
+    for(int i = 0; i < _RimLightsCount; i++)
+    {
+        RimLight rimLight = _RimLights[i];
+        outputColor += rimLightProp.rgb * rimLightProp.a * RimLightShading(rimLight.direction, rimLight.color, 1.0, normalWS, specular, 2.0, connectedToRight | !closerThanRight, connectedToLeft | !closerThanLeft, connectedToUp | !closerThanUp, connectedToDown | !closerThanDown);
+    }
+
+    return float4(outputColor, 1.0);
 }

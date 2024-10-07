@@ -34,7 +34,8 @@ int closerThanDown = (connectData & (1 << 0)) > 0 ? 1 : 0;
 #define GET_PROP \
 float4 paletteProp = tex2D(_PalettePropertyBuffer, uv); \
 float4 shapeProp = tex2D(_ShapePropertyBuffer, uv); \
-float4 physicalProp = tex2D(_PhysicalPropertyBuffer, uv);
+float4 physicalProp = tex2D(_PhysicalPropertyBuffer, uv);\
+float4 rimLightProp = tex2D(_RimLightPropertyBuffer, uv);
 
 #define GET_LIGHTMAP_UV \
 float4 UVInfo = tex2D(_LightmapUVBuffer, uv); \

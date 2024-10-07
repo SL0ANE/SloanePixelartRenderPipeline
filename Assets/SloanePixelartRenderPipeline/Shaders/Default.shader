@@ -4,13 +4,17 @@ Shader "Sloane/Pixelart/Default"
     {
         _BaseMap("BaseMap", 2D) = "white" {}
         [Gamma] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _DiffuseDitherPalette("Diffuse Dither Palette", 2D) = "gray" {}
+        _DiffuseDitherStrength("Diffuse Dither Strength", Range(0.0, 1.0)) = 0.0
         _PriorityMap("PriorityMap", 2D) = "white" {}
         _Priority("Priority", Range(0.0, 1.0)) = 1
         _LocalUnitScale("Local Unit Scale", Int) = 1
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
         _Metallic("Metallic", Range(0.0, 1.0)) = 0.1
         _NormalBlendScale("Normal Blend Scale", Range(0.0, 1.0)) = 0.0
+        _NormalEdgeThreshold("Normal Edge Threshold", Range(0.0, 1.0)) = 1.0
         _MainLightLevel("Main Light Level", Int) = 2
+        _RimLightColor("Rim Light Color", Color) = (1.0, 1.0, 1.0, 0.0)
     }
     SubShader
     {

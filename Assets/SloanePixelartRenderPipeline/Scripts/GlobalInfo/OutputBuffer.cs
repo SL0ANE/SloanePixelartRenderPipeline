@@ -11,14 +11,16 @@ namespace Sloane
         Albedo = 1,
         Normal = 2,
         PhysicalProperty = 3,   // 光滑度，金属度
-        ShapeProperty = 4,    // 优先级，法线融合强度
+        ShapeProperty = 4,    // 优先级，法线融合强度, 法线边缘阈值
         PaletteProperty = 5,    // 主光源级数，dither灰度
-        UV = 6,    // 根据优先级整出的UV偏移
-        ConnectivityDetail = 7,
-        ConnectivityResult = 8,
-        Diffuse = 9,
-        Specular = 10,
-        GlobalIllumination = 11,
+        RimLightProperty = 6,    // 边缘光颜色与强度
+        UV = 7,    // 根据优先级整出的UV偏移
+        ConnectivityDetail = 8,
+        ConnectivityResult = 9,
+        Diffuse = 10,
+        Specular = 11,
+        GlobalIllumination = 12,
+        RimLight = 13,
         Max,
     }
 
@@ -27,11 +29,11 @@ namespace Sloane
     {
         Start = -1,
         MarkerDepth = 0,
-        StageRenderObjects = 5,
-        MarkerPriority = 6,
-        MarkerConnectivityDetail = 7,
-        MarkerConnectivityResult = 8,
-        StageShading = 11,
+        StageRenderObjects = 6,
+        MarkerPriority = 7,
+        MarkerConnectivityDetail = 8,
+        MarkerConnectivityResult = 9,
+        StageShading = 13,
 
         Max,
     }
