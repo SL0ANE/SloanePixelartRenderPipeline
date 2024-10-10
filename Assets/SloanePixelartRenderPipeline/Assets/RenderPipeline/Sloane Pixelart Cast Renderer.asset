@@ -181,7 +181,7 @@ MonoBehaviour:
   m_Active: 1
   m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,
     type: 3}
-  m_Palette: {fileID: 2800000, guid: b84a234509a1f6246abdb6113cb6a26f, type: 3}
+  m_Palette: {fileID: 2800000, guid: 304be462fed47a743992449853a5e62c, type: 3}
 --- !u!114 &7011952267336840844
 MonoBehaviour:
   m_ObjectHideFlags: 0
