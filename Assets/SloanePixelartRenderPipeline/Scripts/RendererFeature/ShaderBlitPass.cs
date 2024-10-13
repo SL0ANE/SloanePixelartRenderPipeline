@@ -76,6 +76,7 @@ namespace Sloane
                 else
                 {
                     cmd.SetRenderTarget(m_TargetBuffer);
+                    cmd.SetGlobalTexture(ShaderPropertyStorage.MainTex, m_SourceBuffer);
                     if(m_Material != null) cmd.Blit(m_SourceBuffer, m_TargetBuffer, m_Material, m_PassID);
                     else cmd.Blit(m_SourceBuffer, m_TargetBuffer);
                 }

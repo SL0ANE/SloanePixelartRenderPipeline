@@ -33,7 +33,7 @@ sampler2D _GlobalIlluminationBuffer;
 
 float _SamplingScale;
 
-float3 DiffuseShading(Light light, float3 normal, float connect, float normalDiff, float normalEdgeThreshold, float level, float offset, float transmission, int applyAA = 1)
+float3 DiffuseShading(Light light, float3 normal, float connect, float normalDiff, float normalEdgeThreshold, float normalEdgeLevel, float level, float offset, float transmission, int applyAA = 1)
 {
     float ndotl = dot(light.direction, normal);
     ndotl *= light.distanceAttenuation * light.shadowAttenuation;
@@ -50,9 +50,9 @@ float3 DiffuseShading(Light light, float3 normal, float connect, float normalDif
 
         ndotl = multiStep(ndotl, level, 0.0, 0.0);
         if((ndotl > singleLevel && connect < _ConnectivityAntialiasingThreshold) && applyAA == 1) ndotl -= singleLevel;
-        if((normalDiff > normalEdgeThreshold)) ndotl -= singleLevel;
+        if((normalDiff > normalEdgeThreshold)) ndotl += singleLevel * normalEdgeLevel;
 
-        ndotl = saturate(ndotl);
+        ndotl = clamp(ndotl, 0.0, 1.0 + singleLevel);
 
         ndotl = lerp(transmission, 1.0, ndotl);
     }
@@ -87,13 +87,14 @@ half4 DiffuseFragment(Varyings input) : SV_Target
     int applyAA = 1;
     float3 rimLightInfo = tex2D(_RimLightBuffer, uv).rgb;
     if(rimLightInfo.r > 0.0 || rimLightInfo.g > 0.0 || rimLightInfo.g > 0.0) applyAA = 0;
+    float normalEdgeLevel = (paletteProp.b * 2.0 - 1.0) * 128.0;
 
     Light mainLight = GetMainLight(shadowCoord);
-    outputColor += DiffuseShading(mainLight, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, mainLightLevel, ditherOffset, 0.0, applyAA);
+    outputColor += DiffuseShading(mainLight, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, normalEdgeLevel, mainLightLevel, ditherOffset, 0.0, applyAA);
 
     LIGHT_LOOP_BEGIN(_AdditionalLightCount)
         Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
-        outputColor += DiffuseShading(light, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, 3.0, ditherOffset, 0.0, applyAA);
+        outputColor += DiffuseShading(light, normalWS, connectInfo.g, connectInfo.b, shapeProp.b, normalEdgeLevel * 0.5, 3.0, ditherOffset, 0.0, applyAA);
     LIGHT_LOOP_END
 
     outputColor *= albedo.rgb;
@@ -161,7 +162,7 @@ half3 GlobalIlluminationShading(BRDFData brdfData, half3 bakedGI, half occlusion
     
     half3 reflectVector = reflect(-viewDirectionWS, normalWS);
     half NoV = multiStep(saturate(dot(normalWS, viewDirectionWS)), 2.0, 0.0, levelBias);
-    half fresnelTerm = Pow4(1.0 - NoV);
+    half fresnelTerm = lerp(Pow4(1.0 - NoV), 0.0, brdfData.reflectivity);
 
     half3 indirectDiffuse = bakedGI;
     half3 indirectSpecular = GlossyEnvironmentReflection(reflectVector, brdfData.perceptualRoughness, 1.0h);
@@ -186,7 +187,7 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
     float smoothness = physicalProp.r;
     float expSmoothness = exp2(10.0 * smoothness + 1.0);
     float metallic = physicalProp.g;
-    float3 specular = lerp(float3(1.0, 1.0, 1.0), albedo, metallic);
+    float3 specular = lerp(float3(0.0, 0.0, 0.0), albedo, metallic);
     float3 viewDir = GetViewDir();
 
     float oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
@@ -194,7 +195,7 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
     BRDFData brdfData = (BRDFData)0;
     brdfData.albedo = albedo;
     brdfData.diffuse = albedo * oneMinusReflectivity;
-    brdfData.specular = float3(0.0, 0.0, 0.0);
+    brdfData.specular = specular;
     brdfData.reflectivity = reflectivity;
 
     brdfData.perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(smoothness);

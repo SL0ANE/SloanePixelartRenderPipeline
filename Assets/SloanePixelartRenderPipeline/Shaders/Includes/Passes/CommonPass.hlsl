@@ -18,10 +18,11 @@ Varyings PixelartBaseVert(Attributes input)
     float3 originVS = mul(PIXELART_CAMERA_MATRIX_V, float4(originWS, 1.0));
 #ifdef UNIT_SCALE
     float unitSize = _UnitSize / _LocalUnitScale;
-    float3 originVSOffset = float3(UNITSNAP(originVS.x, unitSize), UNITSNAP(originVS.y, unitSize), originVS.z) - originVS;
 #else
-    float3 originVSOffset = float3(UNITSNAP(originVS.x, _UnitSize), UNITSNAP(originVS.y, _UnitSize), originVS.z) - originVS;
+    float unitSize = _UnitSize;
 #endif
+    float3 originVSAligned = float3(UNITSNAP(originVS.x, unitSize), UNITSNAP(originVS.y, unitSize), originVS.z);
+    float3 originVSOffset = originVSAligned - originVS;
 #endif
 
     output.positionWS = mul(modelMatrix, float4(input.positionOS.xyz, 1.0)).xyz;
@@ -42,6 +43,14 @@ Varyings PixelartBaseVert(Attributes input)
 #endif
 
     output.positionSS = ComputeScreenPos(output.positionCS);
+    output.positionSS.xy /= output.positionSS.w;
+
+#ifdef ALIGN_TO_PIXEL
+    float4 originSS = ComputeScreenPos(mul(GetViewToHClipMatrix(), float4(originVSAligned, 1.0)));
+    originSS.xy /= originSS.w;
+    output.positionSSO = output.positionSS.xy - originSS.xy;
+#else
+#endif
 
     output.uv = input.uv;
 

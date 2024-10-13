@@ -34,20 +34,16 @@ Varyings ShadowVert(Attributes input)
     float3 originVS = mul(PIXELART_CAMERA_MATRIX_V, float4(originWS, 1.0));
 #ifdef UNIT_SCALE
     float unitSize = _UnitSize / _LocalUnitScale;
-    float3 originVSOffset = float3(UNITSNAP(originVS.x, unitSize), UNITSNAP(originVS.y, unitSize), originVS.z) - originVS;
 #else
-    float3 originVSOffset = float3(UNITSNAP(originVS.x, _UnitSize), UNITSNAP(originVS.y, _UnitSize), originVS.z) - originVS;
+    float unitSize = _UnitSize;
 #endif
+    float3 originVSOffset = float3(UNITSNAP(originVS.x, unitSize), UNITSNAP(originVS.y, unitSize), originVS.z) - originVS;
 #endif
-
-    output.positionWS = mul(modelMatrix, float4(input.positionOS.xyz, 1.0)).xyz;
-
 
     output.positionWS = mul(modelMatrix, float4(input.positionOS.xyz, 1.0)).xyz;
 
 #ifdef ALIGN_TO_PIXEL
     output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0)) + originVSOffset;
-    // output.positionVS = float3(UNITSNAP(output.positionVS.x, _UnitSize), UNITSNAP(output.positionVS.y, _UnitSize), output.positionVS.z);
 #else
     output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0));
 #endif

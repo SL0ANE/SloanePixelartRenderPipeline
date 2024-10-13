@@ -11,6 +11,7 @@ CBUFFER_START(UnityPerMaterial)
     float _NormalBlendScale;
     float _NormalEdgeThreshold;
     int _MainLightLevel;
+    int _EdgeLevel;
 
     sampler2D _BaseMap;
     float4 _BaseMap_ST;
@@ -41,7 +42,7 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
     float4 shapePropOutput = float4(0.0, 0.0, 0.0, 0.0);
     float4 palettePropOutput = float4(0.0, 0.0, 0.0, 0.0);
 
-    float2 screenPos = input.positionSS.xy / input.positionSS.w;
+    float2 screenPos = input.positionSSO;
 
     physicalPropOutput.r = _Smoothness;
     physicalPropOutput.g = _Metallic;
@@ -50,6 +51,7 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
     palettePropOutput.g = tex2D(_DiffuseDitherPalette, screenPos * _ScreenParams.xy / _DiffuseDitherPalette_ST.xy).r;
     palettePropOutput.g = (palettePropOutput.g * 2.0 - 1.0) * _DiffuseDitherStrength;
     palettePropOutput.g = palettePropOutput.g * 0.5 + 0.5;
+    palettePropOutput.b = float(_EdgeLevel) / 128.0 * 0.5 + 0.5;
 
     shapePropOutput.r = _Priority * tex2D(_PriorityMap, input.uv * _PriorityMap_ST.xy + _PriorityMap_ST.zw).r;
     shapePropOutput.g = _NormalBlendScale;

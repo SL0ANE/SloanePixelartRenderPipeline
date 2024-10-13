@@ -10,7 +10,7 @@ namespace Sloane
     public class SloanePixelartOutlineRendererFeature : ScriptableRendererFeature
     {
         [SerializeField]
-        private Shader m_OutlintShader;
+        private Shader m_OutlineShader;
         [SerializeField]
         private bool m_SolidColor = false;
         [SerializeField]
@@ -21,11 +21,11 @@ namespace Sloane
 
         public override void Create()
         {
-            if(m_OutlintShader == null) return;
+            if(m_OutlineShader == null) return;
 
             m_SolidColorKeyWord = GlobalKeyword.Create("_OUTLINE_SOLID_COLOR");
 
-            m_OutlinePass = new ShaderBlitPass(m_OutlintShader, "Outline", BeforeBlit)
+            m_OutlinePass = new ShaderBlitPass(m_OutlineShader, "Outline", BeforeBlit)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -33,23 +33,26 @@ namespace Sloane
         }
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            if(m_OutlintShader == null) return;
+            if(m_OutlineShader == null) return;
             
             renderer.EnqueuePass(m_OutlinePass);
         }
 
         public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
         {
-            if(m_OutlintShader == null) return;
-
+            if(m_OutlineShader == null) return;
+            
             m_OutlinePass.SetSourceBuffer(renderer.cameraColorTargetHandle);
             m_OutlinePass.SetTargetBuffer(renderer.cameraColorTargetHandle);
         }
 
         protected void BeforeBlit(CommandBuffer cmd, RenderingData renderingData)
         {
+            var pixelArtCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
+
             if(m_SolidColor) cmd.EnableKeyword(m_SolidColorKeyWord);
             else cmd.DisableKeyword(m_SolidColorKeyWord);
+            cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), pixelArtCamera.GetBuffer(TargetBuffer.Diffuse));
             cmd.SetGlobalColor(ShaderPropertyStorage.OutlineColor, m_OutlineColor);
         }
     }

@@ -45,8 +45,8 @@ float2 dynamicLightmapUV = UVInfo.zw; \
 #define GET_NORMAL \
 float3 normalWS = tex2D(_NormalBuffer, uv).xyz; \
 float3 blendNormalWS = normalWS; \
-if(connectedToRight > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(_ScreenParams.z - 1.0, 0.0)).xyz; \
-if(connectedToLeft > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(_ScreenParams.z - 1.0, 0.0)).xyz; \
-if(connectedToUp > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(0.0, _ScreenParams.w - 1.0)).xyz; \
-if(connectedToDown > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(0.0, _ScreenParams.w - 1.0)).xyz; \
+if(connectedToRight > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(1.0 / _ScreenParams.x, 0.0)).xyz; \
+if(connectedToLeft > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(1.0 / _ScreenParams.x, 0.0)).xyz; \
+if(connectedToUp > 0) blendNormalWS += tex2D(_NormalBuffer, uv + float2(0.0, 1.0 / _ScreenParams.y)).xyz; \
+if(connectedToDown > 0) blendNormalWS += tex2D(_NormalBuffer, uv - float2(0.0, 1.0 / _ScreenParams.y)).xyz; \
 normalWS = normalize(lerp(normalWS, normalize(blendNormalWS), shapeProp.g));

@@ -8,6 +8,7 @@
 #include "../Blit.hlsl"
 
 sampler2D _MainTex;
+sampler2D _DiffuseBuffer;
 sampler2D _ConnectivityResultBuffer;
 float4 _OutlineColor;
 
@@ -16,7 +17,7 @@ float3 ApplyOutline(float2 uv)
 #ifdef _OUTLINE_SOLID_COLOR
     return _OutlineColor.rgb;
 #else
-    float3 baseColor = tex2D(_MainTex, uv).rgb;
+    float3 baseColor = tex2D(_DiffuseBuffer, uv).rgb;
     return baseColor * _OutlineColor.rgb;
 #endif
 }

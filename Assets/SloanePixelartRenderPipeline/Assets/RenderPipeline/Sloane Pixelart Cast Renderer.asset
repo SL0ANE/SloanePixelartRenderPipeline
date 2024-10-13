@@ -31,6 +31,10 @@ MonoBehaviour:
     type: 3}
   m_EnableAA: 1
   m_AAScaler: 1.5
+  m_DiffusePassIndex: 0
+  m_SpecularPassIndex: 1
+  m_GlobalIlluminationPassIndex: 2
+  m_RimLightPassIndex: 3
 --- !u!114 &-5677023497241473791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44,9 +48,9 @@ MonoBehaviour:
   m_Name: SloanePixelartOutlineRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  m_OutlintShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
+  m_OutlineShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
   m_SolidColor: 0
-  m_OutlineColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
+  m_OutlineColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,7 +80,21 @@ MonoBehaviour:
   m_Name: Debug
   m_EditorClassIdentifier: 
   m_Active: 0
-  m_TargerBuffer: 1
+  m_TargerBuffer: 13
+--- !u!114 &-607423573253690907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6842a8b28925654da2743d35562cdc3, type: 3}
+  m_Name: SloanePixelartCombineShadingResultsRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_ShadingShader: {fileID: 4800000, guid: 6e9f5ad7a343a6944ba2f797fdd43785, type: 3}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99,10 +117,11 @@ MonoBehaviour:
   - {fileID: 7011952267336840844}
   - {fileID: 4356717984580538091}
   - {fileID: -7620938903301614757}
+  - {fileID: -607423573253690907}
   - {fileID: -5677023497241473791}
   - {fileID: -3125560631150118436}
   - {fileID: 5439611315726938619}
-  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcc8c769bac6f754f61eb8e7a91ec2b763c5b93c0e571fc3c96014d6019352937b1dcf959782ac79fd4fb7119deab617d4b
+  m_RendererFeatureMap: 48e94ce5ff4d53897e2cdb6b1d10adcc8c769bac6f754f61eb8e7a91ec2b763c5b93c0e571fc3c96e5e903787aff91f7014d6019352937b1dcf959782ac79fd4fb7119deab617d4b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -181,7 +200,7 @@ MonoBehaviour:
   m_Active: 1
   m_ColorCorrectionShader: {fileID: 4800000, guid: 1818180f5e73aee41ad0f1d51f2dd3fe,
     type: 3}
-  m_Palette: {fileID: 2800000, guid: 304be462fed47a743992449853a5e62c, type: 3}
+  m_Palette: {fileID: 2800000, guid: 0703d52a5b635b048a3e7826a4048c79, type: 3}
 --- !u!114 &7011952267336840844
 MonoBehaviour:
   m_ObjectHideFlags: 0

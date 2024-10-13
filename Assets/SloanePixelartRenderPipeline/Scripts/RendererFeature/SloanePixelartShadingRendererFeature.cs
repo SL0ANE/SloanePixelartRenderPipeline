@@ -17,13 +17,21 @@ namespace Sloane
         private bool m_EnableAA = true;
         [SerializeField]
         private float m_AAScaler = 1.75f;
+        [SerializeField]
+        private int m_DiffusePassIndex = 0;
+        [SerializeField]
+        private int m_SpecularPassIndex = 1;
+        [SerializeField]
+        private int m_GlobalIlluminationPassIndex = 2;
+        [SerializeField]
+        private int m_RimLightPassIndex = 3;
+
         private BeforeShadingPass m_BeforeShadingPass;
         private ShaderBlitPass m_DiffuseShadingPass;
         private ShaderBlitPass m_SpecularShadingPass;
         private ShaderBlitPass m_GlobalIlluminationShadingPass;
         private ShaderBlitPass m_RimLightShadingPass;
         private ComputeShaderPass m_RimLightComputePass;
-        private ShaderBlitPass m_CombinationPass;
         private ComputeBuffer m_RimLightBuffer;
 
         public override void Create()
@@ -35,32 +43,27 @@ namespace Sloane
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
             };
 
-            m_DiffuseShadingPass = new ShaderBlitPass(m_ShadingShader, "Diffuse Shading", null, null, 0)
+            m_DiffuseShadingPass = new ShaderBlitPass(m_ShadingShader, "Diffuse Shading", null, null, m_DiffusePassIndex)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
-            m_SpecularShadingPass = new ShaderBlitPass(m_ShadingShader, "Specular Shading", null, null, 1)
+            m_SpecularShadingPass = new ShaderBlitPass(m_ShadingShader, "Specular Shading", null, null, m_SpecularPassIndex)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
-            m_GlobalIlluminationShadingPass = new ShaderBlitPass(m_ShadingShader, "Global Illumination Shading", null, null, 2)
+            m_GlobalIlluminationShadingPass = new ShaderBlitPass(m_ShadingShader, "Global Illumination Shading", null, null, m_GlobalIlluminationPassIndex)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
-            m_RimLightShadingPass = new ShaderBlitPass(m_ShadingShader, "Rim Light Shading", BeforeRimLightShading, null, 3)
+            m_RimLightShadingPass = new ShaderBlitPass(m_ShadingShader, "Rim Light Shading", BeforeRimLightShading, null, m_RimLightPassIndex)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
 
             m_RimLightComputePass = new ComputeShaderPass(m_RimLightComputeShader, "Main", "ConnectivityMapGeneration", 8, 8)
-            {
-                renderPassEvent = RenderPassEvent.AfterRendering
-            };
-
-            m_CombinationPass = new ShaderBlitPass(m_ShadingShader, "Shading Combination", null, null, 4)
             {
                 renderPassEvent = RenderPassEvent.AfterRendering
             };
@@ -94,7 +97,6 @@ namespace Sloane
             renderer.EnqueuePass(m_DiffuseShadingPass);
             renderer.EnqueuePass(m_SpecularShadingPass);
             renderer.EnqueuePass(m_GlobalIlluminationShadingPass);
-            renderer.EnqueuePass(m_CombinationPass);
         }
 
         public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
@@ -116,9 +118,6 @@ namespace Sloane
 
             m_RimLightShadingPass.SetSourceBuffer(albedoBuffer);
             m_RimLightShadingPass.SetTargetBuffer(pixelartCamera.GetBuffer(TargetBuffer.RimLight));
-
-            m_CombinationPass.SetSourceBuffer(albedoBuffer);
-            m_CombinationPass.SetTargetBuffer(renderer.cameraColorTargetHandle);
         }
         protected override void Dispose(bool disposing)
         {

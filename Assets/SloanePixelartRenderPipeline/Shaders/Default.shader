@@ -14,6 +14,7 @@ Shader "Sloane/Pixelart/Default"
         _NormalBlendScale("Normal Blend Scale", Range(0.0, 1.0)) = 0.0
         _NormalEdgeThreshold("Normal Edge Threshold", Range(0.0, 1.0)) = 1.0
         _MainLightLevel("Main Light Level", Int) = 2
+        _EdgeLevel("Edge Level", float) = -1.0
         _RimLightColor("Rim Light Color", Color) = (1.0, 1.0, 1.0, 0.0)
     }
     SubShader
