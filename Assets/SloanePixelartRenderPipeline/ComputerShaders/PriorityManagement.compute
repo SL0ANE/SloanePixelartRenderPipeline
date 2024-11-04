@@ -8,6 +8,18 @@ uint _Width;
 uint _Height;
 float _CenterDistanceAttenuation;
 
+Texture2D<float4> _ConnectivityDetailBuffer;
+
+#define BUFFER_WIDTH (_Width * _SamplingScale)
+#define BUFFER_HEIGHT (_Height * _SamplingScale)
+
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "../Shaders/Includes/Inputs/CameraParams.hlsl"
+#include "../Shaders/Includes/Transform.hlsl"
+#include "../Shaders/Includes/Connectivity.hlsl"
+
 [numthreads(8,8,1)]
 void Main (uint3 id : SV_DispatchThreadID)
 {
@@ -18,6 +30,9 @@ void Main (uint3 id : SV_DispatchThreadID)
     float curPriority = 0;
     int2 targetCoordOffset = 0;
     int curCenterDis = 65535;
+    float fakeFloot = 0.0;
+    int data;
+    
     if(_AlbedoBuffer[sourceCoordCenter].a == 0.0) return;
 
     for(int i = 0; i < _SamplingScale; i++)
@@ -26,6 +41,22 @@ void Main (uint3 id : SV_DispatchThreadID)
         {
             uint2 sourceCoord = sourceCoordStart + uint2(i, j);
             float4 targetColor = _ShapePropertyBuffer[sourceCoord];
+
+            float4 rawData = _ConnectivityDetailBuffer[sourceCoord];
+            UnpackFloatInt8bit(rawData.r, 256.0, fakeFloot, data);
+            int targetConnectedToCenter = (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.g, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.b, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            UnpackFloatInt8bit(rawData.a, 256.0, fakeFloot, data);
+            targetConnectedToCenter += (data & (1 << 5)) > 0 ? 1 : 0;
+
+            if(targetConnectedToCenter == 0) continue;
+
             int2 centerDis = float2(sourceCoord) - float2(sourceCoordCenter);
             int centerMaxDis = max(abs(centerDis.x), abs(centerDis.y));
             float priority = (targetColor.r + 0.00001) * pow((1.0 - float(centerMaxDis) / float(_SamplingScale / 2)), _CenterDistanceAttenuation);

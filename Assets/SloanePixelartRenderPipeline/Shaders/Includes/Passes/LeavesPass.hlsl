@@ -29,6 +29,9 @@ CBUFFER_START(UnityPerMaterial)
     float4 _PriorityMap_ST;
 
     float _AAScale;
+
+    float _LeavesCount;
+    float _Progress;
 CBUFFER_END
 
 UNITY_INSTANCING_BUFFER_START(Props)
@@ -37,11 +40,14 @@ UNITY_INSTANCING_BUFFER_END(Props)
 
 #include "CommonPass.hlsl"
 
-void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal0: BUFFER_NORMAL0, out float4 outNormal1: BUFFER_NORMAL1, out float4 outPhysical: BUFFER_PHYSICAL, out float4 outShape: BUFFER_SHAPE, out float4 outPalette: BUFFER_PALETTE, out float4 outRimLight: BUFFER_RIMLIGHT, out float4 outLightmapUV: BUFFER_LIGHTMAP_UV)
+void LeavesFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4 outNormal0: BUFFER_NORMAL0, out float4 outNormal1: BUFFER_NORMAL1, out float4 outPhysical: BUFFER_PHYSICAL, out float4 outShape: BUFFER_SHAPE, out float4 outPalette: BUFFER_PALETTE, out float4 outRimLight: BUFFER_RIMLIGHT, out float4 outLightmapUV: BUFFER_LIGHTMAP_UV)
 {
-    outAlbedo = tex2D(_BaseMap, input.uv * _BaseMap_ST.xy + _BaseMap_ST.zw);
-    clip(outAlbedo.a - 0.003922);
-    outAlbedo *= _BaseColor;
+    float4 baseInfo = tex2D(_BaseMap, input.uv * _BaseMap_ST.xy + _BaseMap_ST.zw);
+    clip(baseInfo.a - 0.003922);
+    outAlbedo = _BaseColor;
+    
+    float progress = saturate((1.0 - (baseInfo.g / (_LeavesCount + 1) * _LeavesCount) - _Progress) * _LeavesCount);
+    clip(baseInfo.r - progress);
 
     float3 screenSpaceNormal = normalize(cross(ddy(input.positionWS) , ddx(input.positionWS)));
     outNormal0 = float4(screenSpaceNormal, 1.0);
@@ -66,11 +72,11 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
 
     palettePropOutput.r = float(_MainLightLevel) / 255.0;
     palettePropOutput.g = tex2D(_DiffuseDitherPalette, screenPos * _ScreenParams.xy / _DiffuseDitherPalette_ST.xy).r;
-    palettePropOutput.g = (palettePropOutput.g * 2.0 - 1.0) * _DiffuseDitherStrength;
+    palettePropOutput.g = (palettePropOutput.g * 2.0 - 1.0) * _DiffuseDitherStrength + baseInfo.b * 2.0;
     palettePropOutput.g = palettePropOutput.g * 0.5 + 0.5;
     palettePropOutput.b = float(_EdgeLevel) / 128.0 * 0.5 + 0.5;
 
-    shapePropOutput.r = _Priority * tex2D(_PriorityMap, input.uv * _PriorityMap_ST.xy + _PriorityMap_ST.zw).r;
+    shapePropOutput.r = _Priority * baseInfo.g;
     // shapePropOutput.g = _NormalBlendScale;
     shapePropOutput.b = _NormalEdgeThreshold;
     shapePropOutput.a = _AAScale / 255.0;

@@ -14,7 +14,7 @@ Varyings PixelartBaseVert(Attributes input)
     if(hasSnapOffset) modelMatrix = mul(snapOffset, modelMatrix);
 
 #ifdef ALIGN_TO_PIXEL
-    float3 originWS = mul(modelMatrix, float4(0.0, 0.0, 0.0, 1.0)).xyz;
+    float3 originWS = float3(modelMatrix._m03, modelMatrix._m13, modelMatrix._m23);
     float3 originVS = mul(PIXELART_CAMERA_MATRIX_V, float4(originWS, 1.0));
 #ifdef UNIT_SCALE
     float unitSize = _UnitSize / _LocalUnitScale;
@@ -26,12 +26,12 @@ Varyings PixelartBaseVert(Attributes input)
 #endif
 
     output.positionWS = mul(modelMatrix, float4(input.positionOS.xyz, 1.0)).xyz;
+    output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0));
 
 #ifdef ALIGN_TO_PIXEL
-    output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0)) + originVSOffset;
-#else
-    output.positionVS = mul(PIXELART_CAMERA_MATRIX_V, float4(output.positionWS, 1.0));
+    output.positionVS += originVSOffset;
 #endif
+
     output.positionCS = mul(GetViewToHClipMatrix(), float4(output.positionVS, 1.0));
 
     output.normalWS = TransformObjectToWorldNormal(input.normalOS);

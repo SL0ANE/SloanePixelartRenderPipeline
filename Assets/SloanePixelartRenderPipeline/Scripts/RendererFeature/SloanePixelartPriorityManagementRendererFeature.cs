@@ -33,6 +33,7 @@ namespace Sloane
             m_PriorityManagementPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.ShapeProperty), pixelartCamera.GetBuffer(TargetBuffer.ShapeProperty));
             m_PriorityManagementPass.AddSourceBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Albedo), pixelartCamera.GetBuffer(TargetBuffer.Albedo));
             m_PriorityManagementPass.SetTargetBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.UV), pixelartCamera.GetBuffer(TargetBuffer.UV));
+            m_PriorityManagementPass.SetTargetBuffer(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.ConnectivityDetail), pixelartCamera.GetBuffer(TargetBuffer.ConnectivityDetail));
             renderer.EnqueuePass(m_PriorityManagementPass);
         }
 

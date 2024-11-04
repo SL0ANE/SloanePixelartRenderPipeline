@@ -1,5 +1,5 @@
 Texture2D<float> _DepthBuffer;
-Texture2D<float4> _NormalBuffer;
+Texture2D<float4> _Normal0Buffer;
 float _Threshold;
 
 #define LINEAR_DEPTH(rawDepth) ((unity_OrthoParams.w == 0)?LinearEyeDepth(rawDepth, _ZBufferParams):lerp(_ProjectionParams.y,_ProjectionParams.z,rawDepth))
@@ -7,7 +7,7 @@ float _Threshold;
 float CheckNormalContinuous(int2 coord, int width, int height)
 {
     float maxNormalDiff = 0.0;
-    float3 centerNormal = _NormalBuffer[coord].xyz;
+    float3 centerNormal = _Normal0Buffer[coord].xyz;
 
     int2 up = coord + int2(0, 1);
     int2 down = coord + int2(0, -1);
@@ -15,8 +15,8 @@ float CheckNormalContinuous(int2 coord, int width, int height)
     int2 right = coord + int2(1, 0);
 
     if (up.y < height && down.y >= 0) {
-        float3 upNormal = _NormalBuffer[up].xyz;
-        float3 downNormal = _NormalBuffer[down].xyz;
+        float3 upNormal = _Normal0Buffer[up].xyz;
+        float3 downNormal = _Normal0Buffer[down].xyz;
 
         if(upNormal.z < 0.0 && downNormal.z < 0.0)
         {
@@ -26,8 +26,8 @@ float CheckNormalContinuous(int2 coord, int width, int height)
     }
 
     if (right.x < width && left.x >= 0) {
-        float3 leftNormal = _NormalBuffer[left].xyz;
-        float3 rightNormal = _NormalBuffer[right].xyz;
+        float3 leftNormal = _Normal0Buffer[left].xyz;
+        float3 rightNormal = _Normal0Buffer[right].xyz;
 
         if(leftNormal.z < 0.0 && rightNormal.z < 0.0)
         {
@@ -59,7 +59,7 @@ void CheckConnectedDepthNormal(int2 center, int2 target, inout uint connected, i
     centerDepth = LINEAR_DEPTH(centerDepth);
     targetDepth = LINEAR_DEPTH(targetDepth);
 
-    closer = centerDepth < targetDepth ? 1 : 0;
+    closer = centerDepth <= targetDepth ? 1 : 0;
     connected = 1;
 
     int2 prev = center;
@@ -74,7 +74,7 @@ void CheckConnectedDepthNormal(int2 center, int2 target, inout uint connected, i
         float2 targetUV = float2(float(next.x) / float(BUFFER_WIDTH), float(next.y) / float(BUFFER_HEIGHT));
         float3 targetPos = GetViewPositionWithDepth(targetUV, _DepthBuffer[next]);
 
-        float3 normalCenter = _NormalBuffer[prev].xyz;
+        float3 normalCenter = _Normal0Buffer[prev].xyz;
         normalCenter = TransformWorldToViewDir(normalCenter);
 
         float2 pixelSpacing = (centerPos.xy - targetPos.xy);
@@ -85,7 +85,7 @@ void CheckConnectedDepthNormal(int2 center, int2 target, inout uint connected, i
 
         float resultCenter = abs(predictDepth - targetDepth);
 
-        float3 normalTarget = _NormalBuffer[next].xyz;
+        float3 normalTarget = _Normal0Buffer[next].xyz;
         normalTarget = TransformWorldToViewDir(normalTarget);
 
         dz_x = -normalTarget.x * pixelSpacing.x / normalTarget.z;

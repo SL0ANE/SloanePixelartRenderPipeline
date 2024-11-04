@@ -50,4 +50,9 @@ public class SpinDisplay : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, angle, 0) * m_OriginalRotation;
         }
     }
+
+    /* void OnValidate()
+    {
+        Debug.Log($"{gameObject.name} {transform.localToWorldMatrix}");
+    } */
 }
