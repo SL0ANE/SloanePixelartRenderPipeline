@@ -47,10 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e9acdda3adb5c42bf59c4cd350dc30, type: 3}
   m_Name: SloanePixelartOutlineRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_OutlineShader: {fileID: 4800000, guid: a8e0a3679b1f42d479ce8a7ca2f5f552, type: 3}
-  m_SolidColor: 0
-  m_OutlineColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
+  m_SolidColor: 1
+  m_OutlineColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &-3698282000451687298
 MonoBehaviour:
   m_ObjectHideFlags: 0

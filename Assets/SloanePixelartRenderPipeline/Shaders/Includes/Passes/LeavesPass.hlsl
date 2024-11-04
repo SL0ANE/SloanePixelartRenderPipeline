@@ -46,8 +46,7 @@ void LeavesFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4
     clip(baseInfo.a - 0.003922);
     outAlbedo = _BaseColor;
     
-    float progress = saturate((1.0 - (baseInfo.g / (_LeavesCount + 1) * _LeavesCount) - _Progress) * _LeavesCount);
-    clip(baseInfo.r - progress);
+    clip((baseInfo.r + _LeavesCount * baseInfo.g) - (1.0 - _Progress) * (1.0 + _LeavesCount));
 
     float3 screenSpaceNormal = normalize(cross(ddy(input.positionWS) , ddx(input.positionWS)));
     outNormal0 = float4(screenSpaceNormal, 1.0);
