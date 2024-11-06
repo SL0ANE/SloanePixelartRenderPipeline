@@ -7,7 +7,7 @@
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseColor;
     int _LocalUnitScale;
-    int _MainLightLevel;
+    float _MainLightLevel;
 CBUFFER_END
 
 UNITY_INSTANCING_BUFFER_START(Props)

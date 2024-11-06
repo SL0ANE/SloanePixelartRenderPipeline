@@ -48,11 +48,13 @@ namespace Sloane
 
         protected void BeforeBlit(CommandBuffer cmd, RenderingData renderingData)
         {
-            var pixelArtCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
+            var pixelartCamera = SloanePixelartCamera.GetPixelartCamera(renderingData.cameraData.camera, SloanePixelartCamera.CameraTarget.CastCamera);
 
             if(m_SolidColor) cmd.EnableKeyword(m_SolidColorKeyWord);
             else cmd.DisableKeyword(m_SolidColorKeyWord);
-            cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), pixelArtCamera.GetBuffer(TargetBuffer.Diffuse));
+
+            cmd.SetGlobalFloat(ShaderPropertyStorage.SamplingScale, pixelartCamera.DownSamplingScale);
+            cmd.SetGlobalTexture(TargetBufferUtil.GetBufferShaderProperty(TargetBuffer.Diffuse), pixelartCamera.GetBuffer(TargetBuffer.Diffuse));
             cmd.SetGlobalColor(ShaderPropertyStorage.OutlineColor, m_OutlineColor);
         }
     }

@@ -10,7 +10,7 @@ CBUFFER_START(UnityPerMaterial)
     float _Smoothness;
     float _Metallic;
     float _NormalEdgeThreshold;
-    int _MainLightLevel;
+    float _MainLightLevel;
     int _EdgeLevel;
 
     sampler2D _BaseMap;
@@ -29,6 +29,8 @@ CBUFFER_START(UnityPerMaterial)
     float4 _PriorityMap_ST;
 
     float _AAScale;
+
+    int _ApplyOutline;
 
     float _LeavesCount;
     float _Progress;
@@ -74,6 +76,8 @@ void LeavesFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float4
     palettePropOutput.g = (palettePropOutput.g * 2.0 - 1.0) * _DiffuseDitherStrength + baseInfo.b * 2.0;
     palettePropOutput.g = palettePropOutput.g * 0.5 + 0.5;
     palettePropOutput.b = float(_EdgeLevel) / 128.0 * 0.5 + 0.5;
+    int applyOutline = _ApplyOutline > 0 ? 1 : 0;
+    palettePropOutput.a = PackFloatInt8bit(0.0, (applyOutline << 7), 256.0);
 
     shapePropOutput.r = _Priority * baseInfo.g;
     // shapePropOutput.g = _NormalBlendScale;

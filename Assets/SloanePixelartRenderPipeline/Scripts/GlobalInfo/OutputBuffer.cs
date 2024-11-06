@@ -12,8 +12,8 @@ namespace Sloane
         Normal0 = 2,
         Normal1 = 3,
         PhysicalProperty = 4,   // 光滑度，金属度
-        ShapeProperty = 5,    // 优先级，法线融合强度, 法线边缘阈值
-        PaletteProperty = 6,    // 主光源级数，dither灰度
+        ShapeProperty = 5,    // 优先级，法线融合强度（待删）, 法线边缘阈值
+        PaletteProperty = 6,    // 主光源级数，dither灰度, 边缘增减级数, 布尔信息（0：是否应用描边）
         RimLightProperty = 7,    // 边缘光颜色与强度
         UV = 8,    // 根据优先级整出的UV偏移
         ConnectivityDetail = 9,

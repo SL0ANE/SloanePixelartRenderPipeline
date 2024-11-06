@@ -17,8 +17,8 @@ clip(albedo.a - 0.0001);
 #define GET_CONNECTIVITY \
 float4 connectInfo = tex2D(_ConnectivityResultBuffer, uv); \
 int connectData; \
-float fakeFloot = 0.0; \
-UnpackFloatInt8bit(connectInfo.a, 256.0, fakeFloot, connectData); \
+float connectFakeFloot = 0.0; \
+UnpackFloatInt8bit(connectInfo.a, 256.0, connectFakeFloot, connectData); \
 \
 int connectedToRight = (connectData & (1 << 7)) > 0 ? 1 : 0; \
 int connectedToLeft = (connectData & (1 << 6)) > 0 ? 1 : 0; \
@@ -31,11 +31,21 @@ int closerThanUp = (connectData & (1 << 1)) > 0 ? 1 : 0; \
 int closerThanDown = (connectData & (1 << 0)) > 0 ? 1 : 0;
 
 
-#define GET_PROP \
+#define GET_PALETTE_PROP \
 float4 paletteProp = tex2D(_PalettePropertyBuffer, uv); \
+int paletteData; \
+float paletteFakeFloot = 0.0; \
+UnpackFloatInt8bit(paletteProp.a, 256.0, paletteFakeFloot, paletteData); \
+int applyOutline = (paletteData & (1 << 7)) > 0 ? 1 : 0; \
+
+#define GET_SHAPE_PROP \
 float4 shapeProp = tex2D(_ShapePropertyBuffer, uv); \
-float4 physicalProp = tex2D(_PhysicalPropertyBuffer, uv);\
-float4 rimLightProp = tex2D(_RimLightPropertyBuffer, uv);
+
+#define GET_PHYSICAL_PROP \
+float4 physicalProp = tex2D(_PhysicalPropertyBuffer, uv); \
+
+#define GET_RIMLIGHT_PROP \
+float4 rimLightProp = tex2D(_RimLightPropertyBuffer, uv); \
 
 #define GET_LIGHTMAP_UV \
 float4 UVInfo = tex2D(_LightmapUVBuffer, uv); \

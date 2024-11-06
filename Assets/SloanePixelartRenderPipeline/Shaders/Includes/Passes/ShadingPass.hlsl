@@ -69,7 +69,10 @@ half4 DiffuseFragment(Varyings input) : SV_Target
     GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
-    GET_PROP
+    GET_PALETTE_PROP
+    GET_SHAPE_PROP
+    GET_PHYSICAL_PROP
+    GET_RIMLIGHT_PROP
     GET_NORMAL1
 
     // normalWS = FibonacciSphereMap(normalWS, 128);
@@ -129,7 +132,10 @@ half4 SpecularFragment(Varyings input) : SV_Target
     GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
-    GET_PROP
+    GET_PALETTE_PROP
+    GET_SHAPE_PROP
+    GET_PHYSICAL_PROP
+    GET_RIMLIGHT_PROP
     GET_NORMAL1
 
     float smoothness = physicalProp.r;
@@ -181,7 +187,10 @@ half4 GlobalIlluminationFragment(Varyings input) : SV_Target
     GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
-    GET_PROP
+    GET_PALETTE_PROP
+    GET_SHAPE_PROP
+    GET_PHYSICAL_PROP
+    GET_RIMLIGHT_PROP
     GET_NORMAL1
     GET_LIGHTMAP_UV
 
@@ -241,7 +250,10 @@ half4 RimLightFragment(Varyings input) : SV_Target
     GET_UV_WITH_PRIORITY
     GET_ALBEDO
     GET_CONNECTIVITY
-    GET_PROP
+    GET_PALETTE_PROP
+    GET_SHAPE_PROP
+    GET_PHYSICAL_PROP
+    GET_RIMLIGHT_PROP
     GET_NORMAL1
     
     float3 outputColor = float3(0.0, 0.0, 0.0);

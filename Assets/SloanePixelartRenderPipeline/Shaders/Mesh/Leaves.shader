@@ -10,16 +10,17 @@ Shader "Sloane/Pixelart/Leaves"
         _DiffuseDitherStrength("Diffuse Dither Strength", Range(0.0, 1.0)) = 0.0
         _PriorityMap("PriorityMap", 2D) = "white" {}
         _Priority("Priority", Range(0.0, 1.0)) = 1
-        _LocalUnitScale("Local Unit Scale", Int) = 1
+        _LocalUnitScale("Local Unit Scale", Float) = 1
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
         _Metallic("Metallic", Range(0.0, 1.0)) = 0.1
         _NormalEdgeThreshold("Normal Edge Threshold", Range(0.0, 1.0)) = 1.0
-        _MainLightLevel("Main Light Level", Int) = 2
+        _MainLightLevel("Main Light Level", Float) = 2
         _AAScale("AA Scale", Range(1.0, 255.0)) = 1.0
-        _EdgeLevel("Edge Level", float) = -1.0
+        _EdgeLevel("Edge Level", Float) = -1.0
+        _ApplyOutline("Apply Outline", Integer) = 1
         _RimLightColor("Rim Light Color", Color) = (1.0, 1.0, 1.0, 0.0)
 
-        _LeavesCount("Leaves Count", float) = 32.0
+        _LeavesCount("Leaves Count", Float) = 32.0
         _Progress("Progress", Range(0.0, 1.0)) = 0.0
     }
     SubShader

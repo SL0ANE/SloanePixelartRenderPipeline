@@ -10,7 +10,7 @@ CBUFFER_START(UnityPerMaterial)
     float _Smoothness;
     float _Metallic;
     float _NormalEdgeThreshold;
-    int _MainLightLevel;
+    float _MainLightLevel;
     int _EdgeLevel;
 
     sampler2D _BaseMap;
@@ -29,6 +29,8 @@ CBUFFER_START(UnityPerMaterial)
     float4 _PriorityMap_ST;
 
     float _AAScale;
+
+    int _ApplyOutline;
 CBUFFER_END
 
 UNITY_INSTANCING_BUFFER_START(Props)
@@ -69,6 +71,8 @@ void DefaultFrag(Varyings input, out float4 outAlbedo : BUFFER_ALBEDO, out float
     palettePropOutput.g = (palettePropOutput.g * 2.0 - 1.0) * _DiffuseDitherStrength;
     palettePropOutput.g = palettePropOutput.g * 0.5 + 0.5;
     palettePropOutput.b = float(_EdgeLevel) / 128.0 * 0.5 + 0.5;
+    int applyOutline = _ApplyOutline > 0 ? 1 : 0;
+    palettePropOutput.a = PackFloatInt8bit(0.0, (applyOutline << 7), 256.0);
 
     shapePropOutput.r = _Priority * tex2D(_PriorityMap, input.uv * _PriorityMap_ST.xy + _PriorityMap_ST.zw).r;
     // shapePropOutput.g = _NormalBlendScale;
