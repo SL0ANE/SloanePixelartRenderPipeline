@@ -258,7 +258,7 @@ namespace Sloane
                 m_ShadingBuffersIdentifiers[i - (int)TargetBufferStage.MarkerConnectivityResult - 1] = m_TargetBuffers[i];
             }
 
-            RenderTextureDescriptor resultDesc = new RenderTextureDescriptor(TextureWidth, TextureHeight)
+            RenderTextureDescriptor resultDesc = new RenderTextureDescriptor(TargetWidth, TargetHeight)
             {
                 depthBufferBits = 24,
                 enableRandomWrite = true,

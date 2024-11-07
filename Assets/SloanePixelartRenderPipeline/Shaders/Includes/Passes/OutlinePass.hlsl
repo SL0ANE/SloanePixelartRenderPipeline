@@ -12,7 +12,6 @@ sampler2D _DiffuseBuffer;
 sampler2D _ConnectivityResultBuffer;
 sampler2D _PalettePropertyBuffer;
 float4 _OutlineColor;
-float _SamplingScale;
 
 float3 ApplyOutline(float2 uv)
 {
@@ -35,7 +34,7 @@ half4 OutlineFragment(Varyings input) : SV_Target
 
     if(connectedToRight < 1 && closerThanRight < 1)
     {
-        uv = uvCache + float2(_ScreenParams.z - 1.0, 0.0) * _SamplingScale;
+        uv = uvCache + float2(_ScreenParams.z - 1.0, 0.0);
         GET_PALETTE_PROP
         if(applyOutline > 0)
         {
@@ -46,7 +45,7 @@ half4 OutlineFragment(Varyings input) : SV_Target
     
     if(connectedToLeft < 1 && closerThanLeft < 1)
     {
-        uv = uvCache - float2(_ScreenParams.z - 1.0, 0.0) * _SamplingScale;
+        uv = uvCache - float2(_ScreenParams.z - 1.0, 0.0);
         GET_PALETTE_PROP
         if(applyOutline > 0)
         {
@@ -57,7 +56,7 @@ half4 OutlineFragment(Varyings input) : SV_Target
 
     if(connectedToUp < 1 && closerThanUp < 1)
     {
-        uv = uvCache + float2(0.0, _ScreenParams.w - 1.0) * _SamplingScale;
+        uv = uvCache + float2(0.0, _ScreenParams.w - 1.0);
         GET_PALETTE_PROP
         if(applyOutline > 0)
         {
@@ -68,7 +67,7 @@ half4 OutlineFragment(Varyings input) : SV_Target
 
     if(connectedToDown < 1 && closerThanDown < 1)
     {
-        uv = uvCache - float2(0.0, _ScreenParams.w - 1.0) * _SamplingScale;
+        uv = uvCache - float2(0.0, _ScreenParams.w - 1.0);
         GET_PALETTE_PROP
         if(applyOutline > 0)
         {

@@ -176,6 +176,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &110667846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -660,6 +661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 1
+  m_ApplyRange: 0
   rotationRange: 10
   interval: 0.1111111
 --- !u!4 &1473216747
